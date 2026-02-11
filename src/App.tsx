@@ -1,6 +1,4 @@
-import type React from "react"
-
-const App = (): React.ReactNode => {
+const App = () => {
   return (
     <div>Admin Dashboard for Metalix Application</div>
   )
