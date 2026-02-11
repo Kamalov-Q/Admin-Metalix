@@ -1,7 +1,11 @@
 const App = () => {
   return (
-    <div>Admin Dashboard for Metalix Application</div>
+    <div>
+      <div>
+        Admin Dashboard for Metalix Application
+      </div>
+    </div>
   )
-} 
+}
 
 export default App
