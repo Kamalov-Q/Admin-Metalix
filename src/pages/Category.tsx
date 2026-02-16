@@ -35,7 +35,6 @@ export default function CategoriesPage() {
             }),
     });
 
-    // Get full category details for editing
     const { data: fullCategories } = useQuery({
         queryKey: ['categories-full', 'en'],
         queryFn: () => categoriesApi.getAll('en', { page: 1, limit: 100 }),
