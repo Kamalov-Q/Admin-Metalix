@@ -1,0 +1,346 @@
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Upload, X } from 'lucide-react';
+import { useState } from 'react';
+import type { CreateProductDto, Product } from '@/types/products';
+import { useCategories } from '@/hooks/use-categories';
+
+interface ProductFormDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onSubmit: (data: CreateProductDto) => void;
+    product?: Product | null;
+    isLoading?: boolean;
+}
+
+export function ProductFormDialog({
+    open,
+    onOpenChange,
+    onSubmit,
+    product,
+    isLoading,
+}: ProductFormDialogProps) {
+    const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl || null);
+    const uploadMutation = useUploadImage('products');
+    const { data: categories } = useCategories({ page: 1, limit: 1000 });
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+        setValue,
+        watch,
+    } = useForm<CreateProductDto>({
+        defaultValues: {
+            nameEn: product?.nameEn || '',
+            nameRu: product?.nameRu || '',
+            nameUz: product?.nameUz || '',
+            descriptionEn: product?.descriptionEn || '',
+            descriptionRu: product?.descriptionRu || '',
+            descriptionUz: product?.descriptionUz || '',
+            imageUrl: product?.imageUrl || '',
+            categoryId: product?.categoryId || '',
+        },
+    });
+
+    const imageUrl = watch('imageUrl');
+
+    useEffect(() => {
+        if (product) {
+            reset({
+                nameEn: product.nameEn,
+                nameRu: product.nameRu,
+                nameUz: product.nameUz,
+                descriptionEn: product.descriptionEn,
+                descriptionRu: product.descriptionRu,
+                descriptionUz: product.descriptionUz,
+                imageUrl: product.imageUrl,
+                categoryId: product.categoryId,
+            });
+            setImagePreview(product.imageUrl);
+        } else {
+            reset({
+                nameEn: '',
+                nameRu: '',
+                nameUz: '',
+                descriptionEn: '',
+                descriptionRu: '',
+                descriptionUz: '',
+                imageUrl: '',
+                categoryId: '',
+            });
+            setImagePreview(null);
+        }
+    }, [product, reset]);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+
+            uploadMutation.mutate(file, {
+                onSuccess: (url) => {
+                    setValue('imageUrl', url);
+                },
+            });
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        setValue('imageUrl', '');
+    };
+
+    const handleFormSubmit = (data: CreateProductDto) => {
+        onSubmit(data);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>
+                        {product ? 'Edit Product' : 'Add New Product'}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {product
+                            ? 'Update the product information in all languages.'
+                            : 'Create a new product with details in all supported languages.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+                    {/* Image Upload */}
+                    <div className="space-y-2">
+                        <Label>Product Image <span className="text-destructive">*</span></Label>
+                        {imagePreview ? (
+                            <div className="relative w-full h-48 rounded-lg border overflow-hidden">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2"
+                                    onClick={handleRemoveImage}
+                                    disabled={uploadMutation.isPending}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    {uploadMutation.isPending ? (
+                                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                                    ) : (
+                                        <>
+                                            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                                            <p className="text-sm text-muted-foreground">
+                                                Click to upload product image
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    disabled={uploadMutation.isPending}
+                                />
+                            </label>
+                        )}
+                        <input type="hidden" {...register('imageUrl', { required: 'Image is required' })} />
+                        {errors.imageUrl && (
+                            <p className="text-sm text-destructive">{errors.imageUrl.message}</p>
+                        )}
+                    </div>
+
+                    {/* Category */}
+                    <div className="space-y-2">
+                        <Label htmlFor="categoryId">
+                            Category <span className="text-destructive">*</span>
+                        </Label>
+                        <Select
+                            onValueChange={(value) => setValue('categoryId', value)}
+                            defaultValue={product?.categoryId}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {categories?.data.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                        {category.nameEn}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <input
+                            type="hidden"
+                            {...register('categoryId', { required: 'Category is required' })}
+                        />
+                        {errors.categoryId && (
+                            <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+                        )}
+                    </div>
+
+                    {/* Names */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="nameEn">
+                                Name (English) <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="nameEn"
+                                placeholder="Product name in English"
+                                {...register('nameEn', {
+                                    required: 'English name is required',
+                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                })}
+                            />
+                            {errors.nameEn && (
+                                <p className="text-sm text-destructive">{errors.nameEn.message}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="nameRu">
+                                Name (Russian) <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="nameRu"
+                                placeholder="Название на русском"
+                                {...register('nameRu', {
+                                    required: 'Russian name is required',
+                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                })}
+                            />
+                            {errors.nameRu && (
+                                <p className="text-sm text-destructive">{errors.nameRu.message}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="nameUz">
+                                Name (Uzbek) <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                id="nameUz"
+                                placeholder="Mahsulot nomi o'zbekcha"
+                                {...register('nameUz', {
+                                    required: 'Uzbek name is required',
+                                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                                })}
+                            />
+                            {errors.nameUz && (
+                                <p className="text-sm text-destructive">{errors.nameUz.message}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Descriptions */}
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="descriptionEn">
+                                Description (English) <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                                id="descriptionEn"
+                                placeholder="Product description in English"
+                                rows={3}
+                                {...register('descriptionEn', {
+                                    required: 'English description is required',
+                                    minLength: { value: 10, message: 'Description must be at least 10 characters' },
+                                })}
+                            />
+                            {errors.descriptionEn && (
+                                <p className="text-sm text-destructive">{errors.descriptionEn.message}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="descriptionRu">
+                                Description (Russian) <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                                id="descriptionRu"
+                                placeholder="Описание на русском"
+                                rows={3}
+                                {...register('descriptionRu', {
+                                    required: 'Russian description is required',
+                                    minLength: { value: 10, message: 'Description must be at least 10 characters' },
+                                })}
+                            />
+                            {errors.descriptionRu && (
+                                <p className="text-sm text-destructive">{errors.descriptionRu.message}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="descriptionUz">
+                                Description (Uzbek) <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                                id="descriptionUz"
+                                placeholder="Mahsulot tavsifi o'zbekcha"
+                                rows={3}
+                                {...register('descriptionUz', {
+                                    required: 'Uzbek description is required',
+                                    minLength: { value: 10, message: 'Description must be at least 10 characters' },
+                                })}
+                            />
+                            {errors.descriptionUz && (
+                                <p className="text-sm text-destructive">{errors.descriptionUz.message}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            disabled={isLoading || uploadMutation.isPending}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={isLoading || uploadMutation.isPending}>
+                            {(isLoading || uploadMutation.isPending) && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            {product ? 'Update Product' : 'Create Product'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}

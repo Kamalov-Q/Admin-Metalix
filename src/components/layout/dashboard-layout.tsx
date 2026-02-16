@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUIStore } from '@/stores/ui-store';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from './language-selector';
 import {
     LayoutDashboard,
     Package,
@@ -104,7 +105,7 @@ export default function DashboardLayout() {
             </aside>
 
             <div className={cn('transition-all duration-300', sidebarOpen ? 'lg:pl-64' : '')}>
-                <header className="sticky top-0 z-40 h-16 bg-background border-b border-border flex items-center px-4 lg:px-6">
+                <header className="sticky top-0 z-40 h-16 bg-background border-b border-border flex items-center justify-between px-4 lg:px-6">
                     <Button
                         variant="ghost"
                         size="icon"
@@ -113,6 +114,10 @@ export default function DashboardLayout() {
                     >
                         <Menu className="h-5 w-5" />
                     </Button>
+
+                    <div className="flex items-center space-x-2">
+                        <LanguageSelector />
+                    </div>
                 </header>
 
                 <main className="p-4 lg:p-6">

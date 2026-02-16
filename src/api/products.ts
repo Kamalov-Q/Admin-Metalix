@@ -1,11 +1,10 @@
-import type { Languages } from '@/types';
 import apiClient from './client';
-
-import type { PaginatedResult, FilterProductDto } from '@/types/requests';
-import type { CreateProductDto, Product, ProductFormatted, UpdateProductDto } from '@/types/entities';
+import type { CreateProductDto, Product, UpdateProductDto } from '@/types/entities';
+import type { PaginatedResult } from '@/types/pagination';
+import type { FilterProductDto } from '@/types/products';
 
 export const productsApi = {
-    getAll: async (lang: Languages = 'en', filters?: FilterProductDto): Promise<PaginatedResult<ProductFormatted>> => {
+    getAll: async (filters?: FilterProductDto): Promise<PaginatedResult<Product>> => {
         const params = new URLSearchParams();
 
         if (filters?.page) params.append('page', filters.page.toString());
@@ -16,19 +15,19 @@ export const productsApi = {
         if (filters?.sortBy) params.append('sortBy', filters.sortBy);
         if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-        const response = await apiClient.get<PaginatedResult<ProductFormatted>>(
-            `/products?${params.toString()}`,
-            {
-                headers: { 'Accept-Language': lang },
-            }
+        const response = await apiClient.get<PaginatedResult<Product>>(
+            `/products?${params.toString()}`
         );
         return response.data;
     },
 
-    getOne: async (id: string, lang: Languages = 'en'): Promise<ProductFormatted> => {
-        const response = await apiClient.get<ProductFormatted>(`/products/${id}`, {
-            headers: { 'Accept-Language': lang },
-        });
+    getOne: async (id: string): Promise<Product> => {
+        const response = await apiClient.get<Product>(`/products/${id}`);
+        return response.data;
+    },
+
+    getByCategory: async (categoryId: string): Promise<Product[]> => {
+        const response = await apiClient.get<Product[]>(`/products/category/${categoryId}`);
         return response.data;
     },
 

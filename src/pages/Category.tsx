@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoriesApi } from '@/api/categories';
-import type { Category, CreateCategoryDto } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -15,8 +14,12 @@ import {
 } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDateTime } from '@/lib/utils';
 import { CategoryFormDialog } from '@/features/categories/category-form';
 import { DeleteCategoryDialog } from '@/features/categories/delete-category.dialog';
+import Pagination from '@/features/pagination';
+import type { Category, CreateCategoryDto } from '@/types/category';
+
 export default function CategoriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
@@ -26,25 +29,19 @@ export default function CategoriesPage() {
     const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
-        queryKey: ['categories', 'en', { page, limit: 10, search: searchTerm }],
+        queryKey: ['categories', { page, limit: 10, search: searchTerm }],
         queryFn: () =>
-            categoriesApi.getAll('en', {
+            categoriesApi.getAll({
                 page,
                 limit: 10,
                 search: searchTerm,
             }),
     });
 
-    const { data: fullCategories } = useQuery({
-        queryKey: ['categories-full', 'en'],
-        queryFn: () => categoriesApi.getAll('en', { page: 1, limit: 100 }),
-    });
-
     const createMutation = useMutation({
         mutationFn: categoriesApi.create,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
-            queryClient.invalidateQueries({ queryKey: ['categories-full'] });
             toast.success('Category created successfully!');
             setFormOpen(false);
             setSelectedCategory(null);
@@ -59,7 +56,6 @@ export default function CategoriesPage() {
             categoriesApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
-            queryClient.invalidateQueries({ queryKey: ['categories-full'] });
             toast.success('Category updated successfully!');
             setFormOpen(false);
             setSelectedCategory(null);
@@ -73,7 +69,6 @@ export default function CategoriesPage() {
         mutationFn: categoriesApi.delete,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] });
-            queryClient.invalidateQueries({ queryKey: ['categories-full'] });
             toast.success('Category deleted successfully!');
             setDeleteOpen(false);
             setSelectedCategory(null);
@@ -88,24 +83,9 @@ export default function CategoriesPage() {
         setFormOpen(true);
     };
 
-    const handleEdit = (categoryId: string) => {
-        const category = fullCategories?.data.find((_: any) => {
-            // Find in the raw data by matching the formatted id
-            const fullCat = fullCategories.data.find((fc: any) => fc.id === categoryId);
-            return fullCat;
-        });
-
-        if (category) {
-            // We need the full category with all language fields
-            // Let's fetch it from the API
-            categoriesApi.getOne(categoryId, 'en').then(() => {
-                // Since we can't get full data easily, we'll store the ID and fetch on form open
-                setSelectedCategory({ id: categoryId } as Category);
-                setFormOpen(true);
-            });
-        }
-
-        console.log(formOpen ? true : false)
+    const handleEdit = (category: any) => {
+        setSelectedCategory(category);
+        setFormOpen(true);
     };
 
     const handleDelete = (category: any) => {
@@ -174,25 +154,34 @@ export default function CategoriesPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Created At</TableHead>
+                                        <TableHead>English</TableHead>
+                                        <TableHead>Russian</TableHead>
+                                        <TableHead>Uzbek</TableHead>
+                                        <TableHead>Created</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {data.data.map((category) => (
+                                    {data.data.map((category: any) => (
                                         <TableRow key={category.id}>
-                                            <TableCell className="font-medium">{category.name}</TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {/* Note: formatted categories don't have createdAt, using placeholder */}
-                                                {/* {category?.createdAt} */}
+                                                {category.nameEn}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {category.nameRu}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground">
+                                                {category.nameUz}
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground text-sm">
+                                                {formatDateTime(category.createdAt)}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex items-center justify-end space-x-2">
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => handleEdit(category.id)}
+                                                        onClick={() => handleEdit(category)}
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
@@ -212,32 +201,7 @@ export default function CategoriesPage() {
                         </div>
 
                         {/* Pagination */}
-                        <div className="flex items-center justify-between mt-4">
-                            <p className="text-sm text-muted-foreground">
-                                Showing {data.data.length} of {data.meta.total} categories
-                            </p>
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setPage(page - 1)}
-                                    disabled={!data.meta.hasPreviousPage}
-                                >
-                                    Previous
-                                </Button>
-                                <span className="text-sm">
-                                    Page {page} of {data.meta.totalPages}
-                                </span>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setPage(page + 1)}
-                                    disabled={!data.meta.hasNextPage}
-                                >
-                                    Next
-                                </Button>
-                            </div>
-                        </div>
+                        <Pagination meta={data?.meta} length={data?.data?.length} />
                     </>
                 )}
             </Card>
@@ -256,7 +220,7 @@ export default function CategoriesPage() {
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
                 onConfirm={handleDeleteConfirm}
-                categoryName={selectedCategory?.nameEn || ''}
+                category={selectedCategory}
                 isLoading={deleteMutation.isPending}
             />
         </div>

@@ -1,15 +1,10 @@
+import type { PaginatedResult } from '@/types/pagination';
 import apiClient from './client';
-import type {
-    Category,
-    CreateCategoryDto,
-    UpdateCategoryDto,
-    CategoryFormatted,
-    Languages
-} from '@/types';
-import type { PaginatedResult, FilterDto } from '@/types/requests';
+import type { Category, CreateCategoryDto, UpdateCategoryDto } from '@/types/category';
+import type { FilterDto } from '@/types/products';
 
 export const categoriesApi = {
-    getAll: async (lang: Languages = 'en', filters?: FilterDto): Promise<PaginatedResult<CategoryFormatted>> => {
+    getAll: async (filters?: FilterDto): Promise<PaginatedResult<Category>> => {
         const params = new URLSearchParams();
 
         if (filters?.page) params.append('page', filters.page.toString());
@@ -18,19 +13,14 @@ export const categoriesApi = {
         if (filters?.sortBy) params.append('sortBy', filters.sortBy);
         if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-        const response = await apiClient.get<PaginatedResult<CategoryFormatted>>(
+        const response = await apiClient.get<PaginatedResult<Category>>(
             `/category?${params.toString()}`,
-            {
-                headers: { 'Accept-Language': lang },
-            }
         );
         return response.data;
     },
 
-    getOne: async (id: string, lang: Languages = 'en'): Promise<CategoryFormatted> => {
-        const response = await apiClient.get<CategoryFormatted>(`/category/${id}`, {
-            headers: { 'Accept-Language': lang },
-        });
+    getOne: async (id: string): Promise<Category> => {
+        const response = await apiClient.get<Category>(`/category/${id}`);
         return response.data;
     },
 
@@ -45,6 +35,6 @@ export const categoriesApi = {
     },
 
     delete: async (id: string): Promise<void> => {
-        await apiClient.delete(`/categories/${id}`);
+        await apiClient.delete(`/category/${id}`);
     },
 };

@@ -8,32 +8,32 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { Category } from '@/types/category';
 import { Loader2 } from 'lucide-react';
+import type { Product } from '@/types/entities';
 
-interface DeleteCategoryDialogProps {
+interface DeleteProductDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onConfirm: () => void;
-    category: Category | null;
+    product: Product | null;
     isLoading?: boolean;
 }
 
-export function DeleteCategoryDialog({
+export function DeleteProductDialog({
     open,
     onOpenChange,
     onConfirm,
-    category,
+    product,
     isLoading,
-}: DeleteCategoryDialogProps) {
+}: DeleteProductDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will permanently delete the category{' '}
-                        <span className="font-semibold text-foreground">"{category?.nameEn}"</span>.
+                        This will permanently delete the product{' '}
+                        <span className="font-semibold text-foreground">"{product?.nameEn}"</span>.
                         This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -45,7 +45,7 @@ export function DeleteCategoryDialog({
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Delete Category
+                        Delete Product
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

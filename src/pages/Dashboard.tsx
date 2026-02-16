@@ -10,13 +10,13 @@ import { Package, FolderTree, Newspaper, MessageSquare, Star, Briefcase } from '
 
 export default function DashboardPage() {
     const { data: categories } = useQuery({
-        queryKey: ['categories', 'en', { page: 1, limit: 1000 }],
-        queryFn: () => categoriesApi.getAll('en', { page: 1, limit: 1000 }),
+        queryKey: ['categories', 'en', { page: 1, limit: 100 }],
+        queryFn: () => categoriesApi.getAll({ page: 1, limit: 100 }),
     });
 
     const { data: products } = useQuery({
-        queryKey: ['products', 'en', { page: 1, limit: 1000 }],
-        queryFn: () => productsApi.getAll('en', { page: 1, limit: 1000 }),
+        queryKey: ['products', 'en', { page: 1, limit: 100 }],
+        queryFn: () => productsApi.getAll({ page: 1, limit: 100 }),
     });
 
     const { data: requests } = useQuery({
