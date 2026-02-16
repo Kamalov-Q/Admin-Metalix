@@ -90,7 +90,7 @@ export default function CategoriesPage() {
     };
 
     const handleEdit = (categoryId: string) => {
-        const category = fullCategories?.data.find((c: any) => {
+        const category = fullCategories?.data.find((_: any) => {
             // Find in the raw data by matching the formatted id
             const fullCat = fullCategories.data.find((fc: any) => fc.id === categoryId);
             return fullCat;
