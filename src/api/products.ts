@@ -1,7 +1,6 @@
 import apiClient from './client';
-import type { CreateProductDto, Product, UpdateProductDto } from '@/types/entities';
 import type { PaginatedResult } from '@/types/pagination';
-import type { FilterProductDto } from '@/types/products';
+import type { CreateProductDto, FilterProductDto, Product, UpdateProductDto } from '@/types/products';
 
 export const productsApi = {
     getAll: async (filters?: FilterProductDto): Promise<PaginatedResult<Product>> => {

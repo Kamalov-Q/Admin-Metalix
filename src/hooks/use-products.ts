@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '@/api/products';
 import { toast } from 'sonner';
-import type { FilterProductDto } from '@/types/products';
-import type { UpdateProductDto } from '@/types/entities';
+import type { FilterProductDto, UpdateProductDto } from '@/types/products';
 
 export function useProducts(filters?: FilterProductDto) {
     return useQuery({
@@ -50,6 +49,7 @@ export function useUpdateProduct() {
             productsApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.refetchQueries({ queryKey: ['products'] });
             toast.success('Product updated successfully!');
         },
         onError: (error: any) => {

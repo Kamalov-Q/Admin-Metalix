@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { Product, CreateProductDto } from '@/types/entities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -18,22 +17,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, ImageIcon } from 'lucide-react';
 import { formatDateTime, truncate } from '@/lib/utils';
 import Pagination from '@/features/pagination';
-import {
-    useProducts,
-    useCategories,
-    useCreateProduct,
-    useUpdateProduct,
-    useDeleteProduct,
-} from '@/hooks';
-import { DeleteProductDialog } from '@/features/products/delete-product.dialog';
+import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct } from '@/hooks/use-products';
+import { useCategories } from '@/hooks/use-categories';
+import type { CreateProductDto, Product } from '@/types/products';
 import { ProductFormDialog } from '@/features/products/product-form';
+import { DeleteProductDialog } from '@/features/products/delete-product.dialog';
+
 
 export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState<string>('');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [page, setPage] = useState(1);
     const [formOpen, setFormOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -43,10 +39,12 @@ export default function ProductsPage() {
         page,
         limit: 10,
         search: searchTerm,
-        categoryId: categoryFilter || undefined,
+        categoryId: categoryFilter === 'all' ? undefined : categoryFilter,
     });
 
-    const { data: categories } = useCategories({ page: 1, limit: 1000 });
+    console.log(data, 'products coming ')
+
+    const { data: categories } = useCategories({ page: 1, limit: 100 });
     const createMutation = useCreateProduct();
     const updateMutation = useUpdateProduct();
     const deleteMutation = useDeleteProduct();
@@ -138,7 +136,7 @@ export default function ProductsPage() {
                             <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">All Categories</SelectItem>
+                            <SelectItem value="all">All Categories</SelectItem>
                             {categories?.data.map((category) => (
                                 <SelectItem key={category.id} value={category.id}>
                                     {category.nameEn}
@@ -155,23 +153,23 @@ export default function ProductsPage() {
                 ) : !data?.data.length ? (
                     <div className="text-center py-12">
                         <p className="text-muted-foreground">
-                            {searchTerm || categoryFilter
+                            {searchTerm || categoryFilter !== 'all'
                                 ? 'No products found matching your filters.'
                                 : 'No products yet. Create your first one!'}
                         </p>
                     </div>
                 ) : (
                     <>
-                        <div className="rounded-md border">
+                        <div className="rounded-md border overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="w-[100px]">Image</TableHead>
-                                        <TableHead>English</TableHead>
-                                        <TableHead>Russian</TableHead>
-                                        <TableHead>Uzbek</TableHead>
+                                        <TableHead>Name (EN)</TableHead>
+                                        <TableHead className="hidden md:table-cell">Name (RU)</TableHead>
+                                        <TableHead className="hidden lg:table-cell">Name (UZ)</TableHead>
                                         <TableHead>Category</TableHead>
-                                        <TableHead>Created</TableHead>
+                                        <TableHead className="hidden xl:table-cell">Created</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -179,41 +177,53 @@ export default function ProductsPage() {
                                     {data.data.map((product: Product) => (
                                         <TableRow key={product.id}>
                                             <TableCell>
-                                                <img
-                                                    src={product.imageUrl}
-                                                    alt={product.nameEn}
-                                                    className="w-16 h-16 object-cover rounded-md"
-                                                />
+                                                {product.imageUrl ? (
+                                                    <img
+                                                        src={product.imageUrl}
+                                                        alt={product.nameEn}
+                                                        className="w-16 h-16 object-cover rounded-md"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = '';
+                                                            e.currentTarget.style.display = 'none';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+                                                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell>
-                                                <div>
-                                                    <p className="font-medium">{product.nameEn}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {truncate(product.descriptionEn, 50)}
+                                                <div className="max-w-[200px]">
+                                                    <p className="font-medium truncate">{product.nameEn}</p>
+                                                    <p className="text-sm text-muted-foreground truncate">
+                                                        {truncate(product.descriptionEn, 40)}
                                                     </p>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div>
-                                                    <p className="font-medium">{product.nameRu}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {truncate(product.descriptionRu, 50)}
+                                            <TableCell className="hidden md:table-cell">
+                                                <div className="max-w-[200px]">
+                                                    <p className="font-medium truncate">{product.nameRu}</p>
+                                                    <p className="text-sm text-muted-foreground truncate">
+                                                        {truncate(product.descriptionRu, 40)}
                                                     </p>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div>
-                                                    <p className="font-medium">{product.nameUz}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {truncate(product.descriptionUz, 50)}
+                                            <TableCell className="hidden lg:table-cell">
+                                                <div className="max-w-[200px]">
+                                                    <p className="font-medium truncate">{product.nameUz}</p>
+                                                    <p className="text-sm text-muted-foreground truncate">
+                                                        {truncate(product.descriptionUz, 40)}
                                                     </p>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {product.category?.nameEn || '-'}
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {product.category?.nameEn || '-'}
+                                                </span>
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
-                                                {formatDateTime(product.createdAt)}
+                                            <TableCell className="text-muted-foreground text-sm hidden xl:table-cell">
+                                                {formatDateTime(product?.createdAt)}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex items-center justify-end space-x-2">
@@ -239,7 +249,12 @@ export default function ProductsPage() {
                             </Table>
                         </div>
 
-                        <Pagination meta={data?.meta} length={data?.data?.length} />
+                        <Pagination
+                            meta={data?.meta}
+                            length={data?.data?.length}
+                            onPageChange={setPage}
+                            currentPage={page}
+                        />
                     </>
                 )}
             </Card>

@@ -19,10 +19,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Upload, X } from 'lucide-react';
-import { useState } from 'react';
+import { ImageUpload } from '@/components/common/image-upload';
+import { Loader2 } from 'lucide-react';
 import type { CreateProductDto, Product } from '@/types/products';
 import { useCategories } from '@/hooks/use-categories';
+import { queryClient } from '@/lib/query-client';
 
 interface ProductFormDialogProps {
     open: boolean;
@@ -39,9 +40,7 @@ export function ProductFormDialog({
     product,
     isLoading,
 }: ProductFormDialogProps) {
-    const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl || null);
-    const uploadMutation = useUploadImage('products');
-    const { data: categories } = useCategories({ page: 1, limit: 1000 });
+    const { data: categories } = useCategories({ page: 1, limit: 100 });
 
     const {
         register,
@@ -64,6 +63,7 @@ export function ProductFormDialog({
     });
 
     const imageUrl = watch('imageUrl');
+    const categoryId = watch('categoryId');
 
     useEffect(() => {
         if (product) {
@@ -77,7 +77,6 @@ export function ProductFormDialog({
                 imageUrl: product.imageUrl,
                 categoryId: product.categoryId,
             });
-            setImagePreview(product.imageUrl);
         } else {
             reset({
                 nameEn: '',
@@ -89,34 +88,12 @@ export function ProductFormDialog({
                 imageUrl: '',
                 categoryId: '',
             });
-            setImagePreview(null);
         }
-    }, [product, reset]);
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-
-            uploadMutation.mutate(file, {
-                onSuccess: (url) => {
-                    setValue('imageUrl', url);
-                },
-            });
-        }
-    };
-
-    const handleRemoveImage = () => {
-        setImagePreview(null);
-        setValue('imageUrl', '');
-    };
+    }, [product, reset, open]);
 
     const handleFormSubmit = (data: CreateProductDto) => {
         onSubmit(data);
+        queryClient.invalidateQueries({ queryKey: ['products'] });
     };
 
     return (
@@ -136,47 +113,13 @@ export function ProductFormDialog({
                     {/* Image Upload */}
                     <div className="space-y-2">
                         <Label>Product Image <span className="text-destructive">*</span></Label>
-                        {imagePreview ? (
-                            <div className="relative w-full h-48 rounded-lg border overflow-hidden">
-                                <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="w-full h-full object-cover"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    className="absolute top-2 right-2"
-                                    onClick={handleRemoveImage}
-                                    disabled={uploadMutation.isPending}
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    {uploadMutation.isPending ? (
-                                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                                    ) : (
-                                        <>
-                                            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                                            <p className="text-sm text-muted-foreground">
-                                                Click to upload product image
-                                            </p>
-                                        </>
-                                    )}
-                                </div>
-                                <input
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    disabled={uploadMutation.isPending}
-                                />
-                            </label>
-                        )}
+                        <ImageUpload
+                            value={imageUrl}
+                            onChange={(url) => {
+                                setValue('imageUrl', url, { shouldValidate: true });
+                                queryClient.invalidateQueries({ queryKey: ['products'] });
+                            }}
+                        />
                         <input type="hidden" {...register('imageUrl', { required: 'Image is required' })} />
                         {errors.imageUrl && (
                             <p className="text-sm text-destructive">{errors.imageUrl.message}</p>
@@ -189,8 +132,8 @@ export function ProductFormDialog({
                             Category <span className="text-destructive">*</span>
                         </Label>
                         <Select
-                            onValueChange={(value) => setValue('categoryId', value)}
-                            defaultValue={product?.categoryId}
+                            value={categoryId}
+                            onValueChange={(value) => setValue('categoryId', value, { shouldValidate: true })}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a category" />
@@ -198,7 +141,7 @@ export function ProductFormDialog({
                             <SelectContent>
                                 {categories?.data.map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
-                                        {category.nameEn}
+                                        {category?.nameEn}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -328,14 +271,12 @@ export function ProductFormDialog({
                             type="button"
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            disabled={isLoading || uploadMutation.isPending}
+                            disabled={isLoading}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading || uploadMutation.isPending}>
-                            {(isLoading || uploadMutation.isPending) && (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            )}
+                        <Button type="submit" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {product ? 'Update Product' : 'Create Product'}
                         </Button>
                     </DialogFooter>

@@ -12,6 +12,7 @@ export interface Product {
     descriptionEn: string;
     category: Category;
     categoryId: string;
+    createdAt: Date;
     reviews: Review[];
     requests: Request[];
 }
@@ -27,7 +28,7 @@ export interface CreateProductDto {
     categoryId: string;
 }
 
-export interface UpdateCategoryDto extends Partial<CreateProductDto> { }
+export interface UpdateProductDto extends Partial<CreateProductDto> { }
 
 export interface FilterDto {
     page?: number;

@@ -1,17 +1,13 @@
-
-export interface Meta {
-    length?: number;
+export interface PaginationMeta {
     total: number;
+    page: number;
+    limit: number;
     totalPages: number;
-    hasPreviousPage: boolean;
     hasNextPage: boolean;
-}
-
-export interface PaginationType {
-    meta: Meta;
+    hasPreviousPage: boolean;
 }
 
 export interface PaginatedResult<T> {
     data: T[];
-    meta: Meta;
+    meta: PaginationMeta;
 }
