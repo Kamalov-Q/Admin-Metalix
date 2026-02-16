@@ -36,9 +36,10 @@ export default function CareersPage() {
 
     const { data: careers = [], isLoading } = useCareers();
 
+    console.log(careers, 'Careers from backend!');
+
     const filteredCareers = careers.filter((career) => {
         const searchLower = searchTerm.toLowerCase();
-
         return (
             career.fullName.toLowerCase().includes(searchLower) ||
             career.email.toLowerCase().includes(searchLower) ||
