@@ -1,5 +1,5 @@
+import type { Review, UpdateReviewStatusDto } from '@/types/reviews';
 import apiClient from './client';
-import type { Review, UpdateReviewStatusDto } from '@/types/requests';
 
 export const reviewsApi = {
     getAll: async (): Promise<Review[]> => {
@@ -18,7 +18,7 @@ export const reviewsApi = {
     },
 
     updateStatus: async (id: string, dto: UpdateReviewStatusDto): Promise<Review> => {
-        const response = await apiClient.patch<Review>(`/reviews/${id}/status`, dto);
+        const response = await apiClient.patch<Review>(`/reviews/${id}`, dto);
         return response.data;
     },
 };

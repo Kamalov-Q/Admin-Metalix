@@ -164,16 +164,16 @@ export default function CategoriesPage() {
                                 <TableBody>
                                     {data.data.map((category: any) => (
                                         <TableRow key={category.id}>
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="text-muted-foreground font-medium">
                                                 {category.nameEn}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="text-muted-foreground font-medium">
                                                 {category.nameRu}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="text-muted-foreground font-medium">
                                                 {category.nameUz}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
+                                            <TableCell className="text-muted-foreground font-medium text-sm">
                                                 {formatDateTime(category.createdAt)}
                                             </TableCell>
                                             <TableCell className="text-right">
