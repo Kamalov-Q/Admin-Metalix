@@ -8,25 +8,54 @@ import { careersApi } from '@/api/career';
 import { newsApi } from '@/api/news';
 import { Package, FolderTree, Newspaper, MessageSquare, Star, Briefcase } from 'lucide-react';
 
+const requestStatusVariants: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-700',
+    PROCESSING: 'bg-blue-100 text-blue-700',
+    COMPLETED: 'bg-green-100 text-green-700',
+    REJECTED: 'bg-red-100 text-red-700',
+};
+
+const reviewStatusVariants: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-700',
+    APPROVED: 'bg-green-100 text-green-700',
+    REJECTED: 'bg-red-100 text-red-700',
+};
+
+function StarRating({ rating }: { rating: number }) {
+    return (
+        <div className="flex items-center space-x-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                    key={star}
+                    className={`h-3 w-3 ${star <= rating
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'fill-muted text-muted-foreground'
+                        }`}
+                />
+            ))}
+        </div>
+    );
+}
+
 export default function DashboardPage() {
     const { data: categories } = useQuery({
-        queryKey: ['categories', { page: 1, limit: 100 }],
-        queryFn: () => categoriesApi.getAll({ page: 1, limit: 100 }),
+        queryKey: ['categories', { page: 1, limit: 1 }],
+        queryFn: () => categoriesApi.getAll({ page: 1, limit: 1 }),
     });
 
     const { data: products } = useQuery({
-        queryKey: ['products', { page: 1, limit: 100 }],
-        queryFn: () => productsApi.getAll({ page: 1, limit: 100 }),
+        queryKey: ['products', { page: 1, limit: 1 }],
+        queryFn: () => productsApi.getAll({ page: 1, limit: 1 }),
     });
 
     const { data: requests } = useQuery({
-        queryKey: ['requests'],
-        queryFn: requestsApi.getAll,
+        queryKey: ['requests', { page: 1, limit: 100 }],
+        queryFn: () => requestsApi.getAll({ page: 1, limit: 100 }),
     });
 
     const { data: reviews } = useQuery({
-        queryKey: ['reviews'],
-        queryFn: reviewsApi.getAll,
+        queryKey: ['reviews', { page: 1, limit: 100 }],
+        queryFn: () => reviewsApi.getAll({ page: 1, limit: 100 }),
     });
 
     const { data: careers } = useQuery({
@@ -35,9 +64,12 @@ export default function DashboardPage() {
     });
 
     const { data: news } = useQuery({
-        queryKey: ['news'],
-        queryFn: () => newsApi.getAll(),
+        queryKey: ['news', { page: 1, limit: 1 }],
+        queryFn: () => newsApi.getAll({ page: 1, limit: 1 }),
     });
+
+    const pendingRequests = requests?.data?.filter((r) => r.status === 'PENDING').length || 0;
+    const pendingReviews = reviews?.data?.filter((r) => r.status === 'PENDING').length || 0;
 
     const stats = [
         {
@@ -56,21 +88,21 @@ export default function DashboardPage() {
         },
         {
             name: 'News Articles',
-            value: news?.meta?.total || 0,
+            value: news?.meta.total || 0,
             icon: Newspaper,
             color: 'text-purple-600',
             bgColor: 'bg-purple-50',
         },
         {
             name: 'Pending Requests',
-            value: requests?.filter((r) => r.status === 'PENDING').length || 0,
+            value: pendingRequests,
             icon: MessageSquare,
             color: 'text-orange-600',
             bgColor: 'bg-orange-50',
         },
         {
             name: 'Pending Reviews',
-            value: reviews?.filter((r) => r.status === 'PENDING').length || 0,
+            value: pendingReviews,
             icon: Star,
             color: 'text-yellow-600',
             bgColor: 'bg-yellow-50',
@@ -84,6 +116,9 @@ export default function DashboardPage() {
         },
     ];
 
+    const recentRequests = requests?.data?.slice(0, 5) || [];
+    const recentReviews = reviews?.data?.slice(0, 5) || [];
+
     return (
         <div className="space-y-6">
             <div>
@@ -91,6 +126,7 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground">Overview of your admin panel</p>
             </div>
 
+            {/* Stats Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {stats.map((stat) => (
                     <Card key={stat.name}>
@@ -107,35 +143,46 @@ export default function DashboardPage() {
                 ))}
             </div>
 
+            {/* Recent Activity */}
             <div className="grid gap-4 md:grid-cols-2">
+                {/* Recent Requests */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Recent Requests</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-2">
-                            {requests?.slice(0, 5).map((request) => (
-                                <div
-                                    key={request.id}
-                                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
-                                >
-                                    <div>
-                                        <p className="text-sm font-medium">{request.fullName}</p>
-                                        <p className="text-xs text-muted-foreground">{request?.phoneNumber}</p>
-                                    </div>
-                                    <span
-                                        className={`text-xs px-2 py-1 rounded-full ${request.status === 'PENDING'
-                                            ? 'bg-yellow-100 text-yellow-700'
-                                            : request.status === 'ACCEPTED'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-700'
-                                            }`}
+                        <div className="space-y-3">
+                            {recentRequests.length > 0 ? (
+                                recentRequests.map((request) => (
+                                    <div
+                                        key={request.id}
+                                        className="flex items-center justify-between p-2 rounded-lg hover:bg-accent transition-colors"
                                     >
-                                        {request.status}
-                                    </span>
-                                </div>
-                            ))}
-                            {!requests?.length && (
+                                        <div className="flex items-center space-x-3 min-w-0">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                <span className="text-xs font-medium text-primary">
+                                                    {request.fullName.trim().charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium truncate">
+                                                    {request.fullName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {request.phoneNumber}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ml-2 font-medium ${requestStatusVariants[request.status] ||
+                                                'bg-gray-100 text-gray-700'
+                                                }`}
+                                        >
+                                            {request.status}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
                                 <p className="text-sm text-muted-foreground text-center py-4">
                                     No requests yet
                                 </p>
@@ -144,29 +191,47 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
+                {/* Recent Reviews */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Recent Reviews</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-2">
-                            {reviews?.slice(0, 5).map((review) => (
-                                <div
-                                    key={review.id}
-                                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
-                                >
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">{review.fullName}</p>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {review?.description}
-                                        </p>
+                        <div className="space-y-3">
+                            {recentReviews.length > 0 ? (
+                                recentReviews.map((review) => (
+                                    <div
+                                        key={review.id}
+                                        className="flex items-center justify-between p-2 rounded-lg hover:bg-accent transition-colors"
+                                    >
+                                        <div className="flex items-center space-x-3 min-w-0">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                <span className="text-xs font-medium text-primary">
+                                                    {review.fullName.trim().charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium truncate">
+                                                    {review.fullName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground truncate max-w-[140px]">
+                                                    {review.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end space-y-1 flex-shrink-0 ml-2">
+                                            <StarRating rating={review.rating} />
+                                            <span
+                                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${reviewStatusVariants[review.status] ||
+                                                    'bg-gray-100 text-gray-700'
+                                                    }`}
+                                            >
+                                                {review.status}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm font-medium">{review.rating}★</span>
-                                    </div>
-                                </div>
-                            ))}
-                            {!reviews?.length && (
+                                ))
+                            ) : (
                                 <p className="text-sm text-muted-foreground text-center py-4">
                                     No reviews yet
                                 </p>
