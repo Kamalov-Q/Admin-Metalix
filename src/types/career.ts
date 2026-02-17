@@ -3,18 +3,8 @@ export interface Career {
     fullName: string;
     email: string;
     phoneNumber: string;
-    position: string;
-    resumeUrl: string;
-    coverLetter?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export interface CreateCareerDto {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    position: string;
-    resumeUrl: string;
-    coverLetter?: string;
+    message: string;
+    fileUrl: string;
+    createdAt: Date;
+    updatedAt: Date;
 }

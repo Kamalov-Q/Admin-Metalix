@@ -34,17 +34,14 @@ export default function CareersPage() {
     const [viewOpen, setViewOpen] = useState(false);
     const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
 
-    const { data: careers = [], isLoading } = useCareers();
+    const { data: careers, isLoading } = useCareers();
 
-    console.log(careers, 'Careers from backend!');
-
-    const filteredCareers = careers.filter((career) => {
+    const filteredCareers = careers?.filter((career) => {
         const searchLower = searchTerm.toLowerCase();
         return (
             career.fullName.toLowerCase().includes(searchLower) ||
             career.email.toLowerCase().includes(searchLower) ||
-            career.phoneNumber.includes(searchLower) ||
-            career.position.toLowerCase().includes(searchLower)
+            career.phoneNumber.includes(searchLower)
         );
     });
 
@@ -55,10 +52,15 @@ export default function CareersPage() {
 
     const handleDownload = (career: Career) => {
         try {
-            const link = document.createElement("a");
-            link.href = career.resumeUrl;
+            if (!career.fileUrl) {
+                toast.error("Resume file not found");
+                return;
+            }
 
-            const urlParts = career.resumeUrl.split("/");
+            const link = document.createElement("a");
+            link.href = career.fileUrl;
+
+            const urlParts = career.fileUrl.split("/");
             const filename =
                 urlParts[urlParts.length - 1] ||
                 `${career.fullName.replace(/\s+/g, "_")}_Resume.pdf`;
@@ -71,20 +73,24 @@ export default function CareersPage() {
             document.body.removeChild(link);
 
             toast.success("Resume download started");
-        } catch {
+        } catch (error) {
+            console.error("Download error:", error);
             toast.error("Failed to download resume");
         }
     };
 
     const getFileIcon = (url: string) => {
+        if (!url) return "📎";
         const extension = url.split(".").pop()?.toLowerCase();
         if (extension === "pdf") return "📄";
         if (extension === "doc" || extension === "docx") return "📝";
         return "📎";
     };
 
-    const getFileExtension = (url: string) =>
-        url.split(".").pop()?.toUpperCase() || "FILE";
+    const getFileExtension = (url: string) => {
+        if (!url) return "FILE";
+        return url.split(".").pop()?.toUpperCase() || "FILE";
+    };
 
     return (
         <div className="space-y-6">
@@ -100,7 +106,8 @@ export default function CareersPage() {
                 </div>
 
                 <Badge variant="secondary" className="text-base px-4 py-2">
-                    {careers.length} Applications
+                    {careers?.length || 0}{" "}
+                    {careers?.length === 1 ? "Application" : "Applications"}
                 </Badge>
             </div>
 
@@ -123,14 +130,15 @@ export default function CareersPage() {
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                ) : filteredCareers.length === 0 ? (
+                ) : !filteredCareers?.length ? (
                     /* Empty State */
                     <div className="text-center py-12">
                         <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                         <p className="text-muted-foreground">
                             {searchTerm
                                 ? "No applications found matching your search."
-                                : "No career applications yet."}
+                                : "No career applications yet."
+                            }
                         </p>
                     </div>
                 ) : (
@@ -140,7 +148,6 @@ export default function CareersPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Applicant</TableHead>
-                                    <TableHead>Position</TableHead>
                                     <TableHead className="hidden md:table-cell">
                                         Contact
                                     </TableHead>
@@ -157,7 +164,7 @@ export default function CareersPage() {
                             </TableHeader>
 
                             <TableBody>
-                                {filteredCareers.map((career) => (
+                                {filteredCareers?.map((career) => (
                                     <TableRow key={career.id}>
                                         {/* Applicant */}
                                         <TableCell>
@@ -177,16 +184,6 @@ export default function CareersPage() {
                                                     </p>
                                                 </div>
                                             </div>
-                                        </TableCell>
-
-                                        {/* Position */}
-                                        <TableCell>
-                                            <Badge
-                                                variant="secondary"
-                                                className="whitespace-nowrap"
-                                            >
-                                                {career.position}
-                                            </Badge>
                                         </TableCell>
 
                                         {/* Contact */}
@@ -218,10 +215,10 @@ export default function CareersPage() {
                                         <TableCell className="hidden lg:table-cell">
                                             <div className="flex items-center space-x-2">
                                                 <span className="text-xl">
-                                                    {getFileIcon(career.resumeUrl)}
+                                                    {getFileIcon(career.fileUrl)}
                                                 </span>
                                                 <span className="text-sm text-muted-foreground">
-                                                    {getFileExtension(career.resumeUrl)}
+                                                    {getFileExtension(career.fileUrl)}
                                                 </span>
                                             </div>
                                         </TableCell>
@@ -265,7 +262,6 @@ export default function CareersPage() {
                 )}
             </Card>
 
-            {/* Details Dialog */}
             <CareerDetailsDialog
                 open={viewOpen}
                 onOpenChange={setViewOpen}

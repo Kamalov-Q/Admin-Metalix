@@ -7,9 +7,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Download, FileText, Mail, Phone, User, Briefcase, Calendar } from 'lucide-react';
+import { Download, FileText, Mail, Phone, User, Calendar } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import { useCareer } from '@/hooks/use-career';
 
@@ -36,10 +35,10 @@ export function CareerDetailsDialog({
         if (!career) return;
 
         const link = document.createElement('a');
-        link.href = career.resumeUrl;
+        link.href = career.fileUrl;
 
         // Extract filename from URL or create one
-        const urlParts = career.resumeUrl.split('/');
+        const urlParts = career.fileUrl.split('/');
         const filename = urlParts[urlParts.length - 1] ||
             `${career.fullName.replace(/\s+/g, '_')}_Resume.pdf`;
 
@@ -52,7 +51,7 @@ export function CareerDetailsDialog({
 
     const handleViewResume = () => {
         if (!career) return;
-        window.open(career.resumeUrl, '_blank');
+        window.open(career.fileUrl, '_blank');
     };
 
     // Detect file type from URL
@@ -63,7 +62,7 @@ export function CareerDetailsDialog({
         return 'unknown';
     };
 
-    const fileType = career ? getFileType(career.resumeUrl) : 'unknown';
+    const fileType = career ? getFileType(career.fileUrl) : 'unknown';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,14 +97,6 @@ export function CareerDetailsDialog({
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">Full Name</p>
                                         <p className="text-sm">{career.fullName}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start space-x-3">
-                                    <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">Position</p>
-                                        <Badge variant="secondary">{career.position}</Badge>
                                     </div>
                                 </div>
 
@@ -145,16 +136,6 @@ export function CareerDetailsDialog({
                             </div>
                         </div>
 
-                        {/* Cover Letter */}
-                        {career.coverLetter && (
-                            <div className="space-y-2">
-                                <h3 className="text-lg font-semibold">Cover Letter</h3>
-                                <div className="rounded-lg bg-muted p-4 max-h-[200px] overflow-y-auto">
-                                    <p className="text-sm whitespace-pre-wrap">{career.coverLetter}</p>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Resume */}
                         <div className="space-y-3">
                             <h3 className="text-lg font-semibold">Resume</h3>
@@ -175,6 +156,7 @@ export function CareerDetailsDialog({
                                     <Button
                                         variant="outline"
                                         size="sm"
+                                        className='cursor-pointer'
                                         onClick={handleViewResume}
                                     >
                                         <FileText className="h-4 w-4 mr-2" />
@@ -183,6 +165,7 @@ export function CareerDetailsDialog({
                                     <Button
                                         variant="default"
                                         size="sm"
+                                        className='cursor-pointer'
                                         onClick={handleDownload}
                                     >
                                         <Download className="h-4 w-4 mr-2" />
@@ -195,7 +178,7 @@ export function CareerDetailsDialog({
                             {fileType === 'pdf' && (
                                 <div className="border rounded-lg overflow-hidden bg-gray-50">
                                     <iframe
-                                        src={`${career.resumeUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        src={`${career.fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                                         className="w-full h-[500px]"
                                         title="Resume Preview"
                                     />
