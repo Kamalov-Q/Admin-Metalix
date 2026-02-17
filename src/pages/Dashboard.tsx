@@ -10,12 +10,12 @@ import { Package, FolderTree, Newspaper, MessageSquare, Star, Briefcase } from '
 
 export default function DashboardPage() {
     const { data: categories } = useQuery({
-        queryKey: ['categories', 'en', { page: 1, limit: 100 }],
+        queryKey: ['categories', { page: 1, limit: 100 }],
         queryFn: () => categoriesApi.getAll({ page: 1, limit: 100 }),
     });
 
     const { data: products } = useQuery({
-        queryKey: ['products', 'en', { page: 1, limit: 100 }],
+        queryKey: ['products', { page: 1, limit: 100 }],
         queryFn: () => productsApi.getAll({ page: 1, limit: 100 }),
     });
 
@@ -35,8 +35,8 @@ export default function DashboardPage() {
     });
 
     const { data: news } = useQuery({
-        queryKey: ['news', 'en'],
-        queryFn: () => newsApi.getAll('en'),
+        queryKey: ['news'],
+        queryFn: () => newsApi.getAll(),
     });
 
     const stats = [
@@ -56,7 +56,7 @@ export default function DashboardPage() {
         },
         {
             name: 'News Articles',
-            value: news?.length || 0,
+            value: news?.meta?.total || 0,
             icon: Newspaper,
             color: 'text-purple-600',
             bgColor: 'bg-purple-50',
@@ -121,12 +121,12 @@ export default function DashboardPage() {
                                 >
                                     <div>
                                         <p className="text-sm font-medium">{request.fullName}</p>
-                                        <p className="text-xs text-muted-foreground">{request.email}</p>
+                                        <p className="text-xs text-muted-foreground">{request?.phoneNumber}</p>
                                     </div>
                                     <span
                                         className={`text-xs px-2 py-1 rounded-full ${request.status === 'PENDING'
                                             ? 'bg-yellow-100 text-yellow-700'
-                                            : request.status === 'COMPLETED'
+                                            : request.status === 'ACCEPTED'
                                                 ? 'bg-green-100 text-green-700'
                                                 : 'bg-gray-100 text-gray-700'
                                             }`}
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">{review.fullName}</p>
                                         <p className="text-xs text-muted-foreground truncate">
-                                            {review.comment}
+                                            {review?.description}
                                         </p>
                                     </div>
                                     <div className="flex items-center space-x-2">

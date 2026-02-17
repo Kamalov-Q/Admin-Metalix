@@ -23,7 +23,7 @@ import Pagination from '@/features/pagination';
 import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import type { CreateProductDto, Product } from '@/types/products';
-import { ProductFormDialog } from '@/features/products/product-form';
+import { ProductFormDialog } from '@/features/products/product-form.dialog';
 import { DeleteProductDialog } from '@/features/products/delete-product.dialog';
 
 

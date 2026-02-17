@@ -15,7 +15,7 @@ import {
 import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateTime } from '@/lib/utils';
-import { CategoryFormDialog } from '@/features/categories/category-form';
+import { CategoryFormDialog } from '@/features/categories/category-form.dialog';
 import { DeleteCategoryDialog } from '@/features/categories/delete-category.dialog';
 import Pagination from '@/features/pagination';
 import type { Category, CreateCategoryDto } from '@/types/category';

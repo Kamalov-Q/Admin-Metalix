@@ -1,19 +1,32 @@
-import type { Languages } from '@/types';
 import apiClient from './client';
-import type { CreateNewsDto, News, NewsFormatted, UpdateNewsDto } from '@/types/entities';
+import type { News, CreateNewsDto, UpdateNewsDto } from '@/types/news';
+import type { PaginatedResult } from '@/types/pagination';
+
+export interface NewsFilterDto {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
+}
 
 export const newsApi = {
-    getAll: async (lang: Languages = 'en'): Promise<NewsFormatted[]> => {
-        const response = await apiClient.get<NewsFormatted[]>('/news', {
-            headers: { 'Accept-Language': lang },
-        });
+    getAll: async (filters?: NewsFilterDto): Promise<PaginatedResult<News>> => {
+        const params = new URLSearchParams();
+        if (filters?.page) params.append('page', filters.page.toString());
+        if (filters?.limit) params.append('limit', filters.limit.toString());
+        if (filters?.search) params.append('search', filters.search);
+        if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+        if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+        const response = await apiClient.get<PaginatedResult<News>>(
+            `/news?${params.toString()}`
+        );
         return response.data;
     },
 
-    getOne: async (id: string, lang: Languages = 'en'): Promise<NewsFormatted> => {
-        const response = await apiClient.get<NewsFormatted>(`/news/${id}`, {
-            headers: { 'Accept-Language': lang },
-        });
+    getOne: async (id: string): Promise<News> => {
+        const response = await apiClient.get<News>(`/news/${id}`);
         return response.data;
     },
 
