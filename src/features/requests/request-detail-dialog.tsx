@@ -27,15 +27,6 @@ interface RequestDetailsDialogProps {
     request: Request | null;
 }
 
-const statusVariants: Record<
-    RequestStatus,
-    'warning' | 'info' | 'success' | 'destructive'
-> = {
-    PENDING: 'warning',
-    ACCEPTED: 'info',
-    REJECTED: 'destructive',
-};
-
 const statusIcons: Record<RequestStatus, React.ReactNode> = {
     PENDING: <Clock className="h-4 w-4" />,
     ACCEPTED: <RotateCcw className="h-4 w-4" />,
