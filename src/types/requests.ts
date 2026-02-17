@@ -1,32 +1,17 @@
-import { type Product } from './entities';
+import type { Product } from './products';
 
-export type RequestStatus = 'PENDING' | 'COMPLETED' | 'REJECTED';
+export type RequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 export interface Request {
     id: string;
     fullName: string;
-    email: string;
     phoneNumber: string;
-    companyName?: string;
-    message?: string;
+    product: Product;
     productId: string;
-    product?: Product;
     status: RequestStatus;
     createdAt: string;
-    updatedAt: string;
 }
 
-export interface CreateRequestDto {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    companyName?: string;
-    message?: string;
-    productId: string;
-}
-
-export interface UpdateRequestDto {
+export interface UpdateRequestStatusDto {
     status: RequestStatus;
 }
-
-

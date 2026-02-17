@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { Request, UpdateRequestDto } from '@/types/requests';
+import type { Request, UpdateRequestStatusDto } from '@/types/requests';
 
 export const requestsApi = {
     getAll: async (): Promise<Request[]> => {
@@ -17,8 +17,8 @@ export const requestsApi = {
         return response.data;
     },
 
-    updateStatus: async (id: string, dto: UpdateRequestDto): Promise<Request> => {
-        const response = await apiClient.patch<Request>(`/requests/${id}/status`, dto);
+    updateStatus: async (id: string, dto: UpdateRequestStatusDto): Promise<Request> => {
+        const response = await apiClient.patch<Request>(`/requests/${id}`, dto);
         return response.data;
     },
 };
