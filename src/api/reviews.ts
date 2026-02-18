@@ -33,7 +33,7 @@ export const reviewsApi = {
     },
 
     updateStatus: async (id: string, dto: UpdateReviewStatusDto): Promise<Review> => {
-        const response = await apiClient.patch<Review>(`/reviews/${id}/status`, dto);
+        const response = await apiClient.patch<Review>(`/reviews/${id}`, dto);
         return response.data;
     },
 };
