@@ -255,9 +255,9 @@ export default function RequestsPage() {
                                             <TableCell className="hidden lg:table-cell">
                                                 {request.product ? (
                                                     <div className="flex items-center space-x-2">
-                                                        {request.product.imageUrl ? (
+                                                        {request.product.imageUrls[0] ? (
                                                             <img
-                                                                src={request.product.imageUrl}
+                                                                src={request.product.imageUrls[0]}
                                                                 alt={request.product.nameEn}
                                                                 className="w-8 h-8 object-cover rounded"
                                                             />

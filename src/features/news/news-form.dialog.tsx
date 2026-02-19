@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/common/image-upload';
 import { Loader2 } from 'lucide-react';
 import type { News, CreateNewsDto } from '@/types/news';
-import { queryClient } from '@/lib/query-client';
 
 interface NewsFormDialogProps {
     open: boolean;
@@ -80,6 +79,10 @@ export function NewsFormDialog({
         }
     }, [news, reset, open]);
 
+    const handleFormSubmit = (data: CreateNewsDto) => {
+        onSubmit(data);
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -94,16 +97,14 @@ export function NewsFormDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    {/* Image */}
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+                    {/* Image - Single only */}
                     <div className="space-y-2">
                         <Label>Article Image <span className="text-destructive">*</span></Label>
                         <ImageUpload
                             value={imageUrl}
-                            onChange={(url) => {
-                                setValue('imageUrl', url, { shouldValidate: true });
-                                queryClient.invalidateQueries({ queryKey: ['news'] });
-                            }}
+                            onChange={(url) => setValue('imageUrl', url as string, { shouldValidate: true })}
+                            multiple={false}
                         />
                         <input
                             type="hidden"

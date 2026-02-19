@@ -222,9 +222,9 @@ export default function ReviewsPage() {
                                             <TableCell className="hidden lg:table-cell">
                                                 {review.product ? (
                                                     <div className="flex items-center space-x-2">
-                                                        {review.product.imageUrl ? (
+                                                        {review.product.imageUrls[0] ? (
                                                             <img
-                                                                src={review.product.imageUrl}
+                                                                src={review.product.imageUrls[0]}
                                                                 alt={review.product.nameEn}
                                                                 className="w-8 h-8 object-cover rounded flex-shrink-0"
                                                             />

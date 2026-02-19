@@ -115,9 +115,9 @@ export function RequestDetailsDialog({
                             <h3 className="text-lg font-semibold">Requested Product</h3>
 
                             <div className="flex items-center space-x-4 p-4 border rounded-lg bg-accent">
-                                {request.product.imageUrl ? (
+                                {request.product.imageUrls[0] ? (
                                     <img
-                                        src={request.product.imageUrl}
+                                        src={request.product.imageUrls[0]}
                                         alt={request.product.nameEn}
                                         className="w-20 h-20 object-cover rounded-md flex-shrink-0"
                                     />

@@ -108,9 +108,9 @@ export function ReviewDetailsDialog({
                         <div className="space-y-3">
                             <h3 className="text-lg font-semibold">Product</h3>
                             <div className="flex items-center space-x-4 p-4 border rounded-lg bg-accent">
-                                {review.product.imageUrl ? (
+                                {review.product.imageUrls[0] ? (
                                     <img
-                                        src={review.product.imageUrl}
+                                        src={review.product.imageUrls[0]}
                                         alt={review.product.nameEn}
                                         className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                                     />
