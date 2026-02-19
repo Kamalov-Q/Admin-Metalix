@@ -1,6 +1,5 @@
 import type { User } from '@/types/auth';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 interface AuthState {
     user: User | null;
@@ -10,58 +9,60 @@ interface AuthState {
     setUser: (user: User) => void;
     setTokens: (accessToken: string, refreshToken: string) => void;
     logout: () => void;
+    clearAuth: () => void;
     initialize: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    isAuthenticated: false,
+
+    setUser: (user) => set({ user, isAuthenticated: true }),
+
+    setTokens: (accessToken, refreshToken) => {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        set({ accessToken, refreshToken, isAuthenticated: true });
+    },
+
+    logout: () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        set({
             user: null,
             accessToken: null,
             refreshToken: null,
             isAuthenticated: false,
+        });
+    },
 
-            setUser: (user) => set({ user, isAuthenticated: true }),
+    clearAuth: () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        set({
+            user: null,
+            accessToken: null,
+            refreshToken: null,
+            isAuthenticated: false,
+        });
+    },
 
-            setTokens: (accessToken, refreshToken) =>
-                set({ accessToken, refreshToken, isAuthenticated: true }),
+    initialize: () => {
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+        const userRaw = localStorage.getItem('user');
 
-            logout: () => {
-                set({
-                    user: null,
-                    accessToken: null,
-                    refreshToken: null,
-                    isAuthenticated: false,
-                });
-                localStorage.removeItem('auth-storage');
-            },
-
-            initialize: () => {
-                const stored = localStorage.getItem('auth-storage');
-                if (stored) {
-                    try {
-                        const parsed = JSON.parse(stored);
-                        if (parsed.state?.accessToken && parsed.state?.user) {
-                            set({
-                                user: parsed.state.user,
-                                accessToken: parsed.state.accessToken,
-                                refreshToken: parsed.state.refreshToken,
-                                isAuthenticated: true,
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Failed to parse stored auth:', error);
-                    }
-                }
-            },
-        }),
-        {
-            name: 'auth-storage',
-            partialize: (state) => ({
-                user: state.user,
-                accessToken: state.accessToken,
-                refreshToken: state.refreshToken,
-            }),
+        if (accessToken && userRaw) {
+            try {
+                const user = JSON.parse(userRaw);
+                set({ user, accessToken, refreshToken, isAuthenticated: true });
+            } catch {
+                localStorage.removeItem('user');
+            }
         }
-    )
-);
+    },
+}));

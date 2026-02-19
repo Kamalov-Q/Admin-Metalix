@@ -14,11 +14,11 @@ import RequestsPage from './pages/Request';
 import ReviewsPage from './pages/Review';
 import CareersPage from './pages/Career';
 
-
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -27,14 +27,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const initialize = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
-    initialize();
+    useAuthStore.getState().initialize();
     setIsInitialized(true);
-  }, [initialize]);
+  }, []);
 
-  // Don't render routes until auth is initialized
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -48,7 +46,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-
           <Route
             path="/"
             element={
@@ -65,7 +62,6 @@ function App() {
             <Route path="reviews" element={<ReviewsPage />} />
             <Route path="careers" element={<CareersPage />} />
           </Route>
-
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

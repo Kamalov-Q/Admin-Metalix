@@ -15,16 +15,12 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const token = useAuthStore.getState().accessToken;
-
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-
         return config;
     },
-    (error: AxiosError) => {
-        return Promise.reject(error);
-    }
+    (error: AxiosError) => Promise.reject(error)
 );
 
 apiClient.interceptors.response.use(
@@ -42,10 +38,7 @@ apiClient.interceptors.response.use(
                     throw new Error('No refresh token available');
                 }
 
-                const response = await axios.post(`${API_URL}/auth/refresh`, {
-                    refreshToken,
-                });
-
+                const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
                 const { accessToken, refreshToken: newRefreshToken } = response.data;
 
                 useAuthStore.getState().setTokens(accessToken, newRefreshToken);
@@ -55,10 +48,10 @@ apiClient.interceptors.response.use(
                 }
 
                 return apiClient(originalRequest);
-            } catch (refreshError) {
-                useAuthStore.getState().logout();
+            } catch {
+                useAuthStore.getState().clearAuth();
                 window.location.href = '/login';
-                return Promise.reject(refreshError);
+                return Promise.reject(error);
             }
         }
 

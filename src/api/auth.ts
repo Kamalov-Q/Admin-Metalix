@@ -1,5 +1,6 @@
 import type { AuthResponse, LoginDto } from '@/types/auth';
 import apiClient from './client';
+import { useAuthStore } from '@/stores/auth-store';
 
 export const authApi = {
     login: async (dto: LoginDto): Promise<AuthResponse> => {
@@ -13,7 +14,10 @@ export const authApi = {
     },
 
     logout: async (): Promise<void> => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        const refreshToken = useAuthStore.getState().refreshToken;
+        if (refreshToken) {
+            await apiClient.post('/auth/logout', { refreshToken }).catch(() => { });
+        }
+        useAuthStore.getState().logout();
     },
 };

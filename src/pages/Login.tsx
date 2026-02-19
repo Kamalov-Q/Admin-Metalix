@@ -2,20 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth-store';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import type { LoginDto } from '@/types/auth';
 
 export default function LoginPage() {
     const navigate = useNavigate();
     const { setUser, setTokens } = useAuthStore();
-    const [isLoading, setIsLoading] = useState(false);
+    const [serverError, setServerError] = useState<string | null>(null);
 
     const {
         register,
@@ -26,26 +25,24 @@ export default function LoginPage() {
     const loginMutation = useMutation({
         mutationFn: authApi.login,
         onSuccess: (data) => {
+            setServerError(null);
             setUser(data.user);
             setTokens(data.accessToken, data.refreshToken);
-            toast.success('Successfully logged in!');
             navigate('/', { replace: true });
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Login failed. Please try again.');
-        },
-        onSettled: () => {
-            setIsLoading(false);
+            const message = error?.response?.data?.message || 'Login failed. Please try again.';
+            setServerError(Array.isArray(message) ? message[0] : message);
         },
     });
 
     const onSubmit = (data: LoginDto) => {
-        setIsLoading(true);
+        setServerError(null);
         loginMutation.mutate(data);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-1">
                     <div className="flex items-center justify-center mb-4">
@@ -66,6 +63,7 @@ export default function LoginPage() {
                                 id="email"
                                 type="email"
                                 placeholder="admin@metalix.com"
+                                className={errors.email ? 'border-destructive' : ''}
                                 {...register('email', {
                                     required: 'Email is required',
                                     pattern: {
@@ -85,6 +83,7 @@ export default function LoginPage() {
                                 id="password"
                                 type="password"
                                 placeholder="••••••••"
+                                className={errors.password ? 'border-destructive' : ''}
                                 {...register('password', {
                                     required: 'Password is required',
                                     minLength: {
@@ -98,8 +97,20 @@ export default function LoginPage() {
                             )}
                         </div>
 
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {serverError && (
+                            <div className="flex items-center gap-2 rounded-md bg-destructive/10 border border-destructive/30 px-3 py-2">
+                                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                                <p className="text-sm text-destructive">{serverError}</p>
+                            </div>
+                        )}
+
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={loginMutation.isPending}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Sign In
                         </Button>
                     </form>
