@@ -3,10 +3,11 @@ import { productsApi } from '@/api/products';
 import { toast } from 'sonner';
 import type { FilterProductDto, UpdateProductDto } from '@/types/products';
 
-export function useProducts(filters?: FilterProductDto) {
+export function useProducts(filters?: FilterProductDto, options?: { enabled: boolean }) {
     return useQuery({
         queryKey: ['products', filters],
         queryFn: () => productsApi.getAll(filters),
+        enabled: options?.enabled
     });
 }
 

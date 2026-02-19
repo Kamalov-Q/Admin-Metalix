@@ -12,13 +12,14 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateTime } from '@/lib/utils';
 import { CategoryFormDialog } from '@/features/categories/category-form.dialog';
 import { DeleteCategoryDialog } from '@/features/categories/delete-category.dialog';
 import Pagination from '@/features/pagination';
 import type { Category, CreateCategoryDto } from '@/types/category';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function CategoriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,13 +29,16 @@ export default function CategoriesPage() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const queryClient = useQueryClient();
 
+    const debouncedSearch = useDebounce(searchTerm, 300);
+    const effectiveSearch = debouncedSearch.length >= 3 ? debouncedSearch : '';
+
     const { data, isLoading } = useQuery({
-        queryKey: ['categories', { page, limit: 10, search: searchTerm }],
+        queryKey: ['categories', { page, limit: 10, search: effectiveSearch }],
         queryFn: () =>
             categoriesApi.getAll({
                 page,
                 limit: 10,
-                search: searchTerm,
+                search: effectiveSearch,
             }),
     });
 
@@ -107,6 +111,11 @@ export default function CategoriesPage() {
         }
     };
 
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setPage(1);
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -116,7 +125,7 @@ export default function CategoriesPage() {
                         Manage your product categories in multiple languages
                     </p>
                 </div>
-                <Button onClick={handleCreate}>
+                <Button onClick={handleCreate} className='cursor-pointer'>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Category
                 </Button>
@@ -127,7 +136,7 @@ export default function CategoriesPage() {
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search categories..."
+                            placeholder={searchTerm?.length > 0 && searchTerm.length < 3 ? `Type ${3 - searchTerm?.length} more character${searchTerm?.length > 1 ? 's' : ''} to search...` : 'Search categories (min 3 chars)...'}
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -135,7 +144,19 @@ export default function CategoriesPage() {
                             }}
                             className="pl-10"
                         />
+                        {searchTerm && (
+                            <button onClick={handleClearSearch} className='absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors' type="button">
+                                <X className='h-4 w-4' />
+                            </button>
+                        )}
+
                     </div>
+                    {searchTerm?.length > 0 && searchTerm?.length < 3 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Enter {3 - searchTerm.length} more character
+                            {3 - searchTerm.length > 1 ? 's' : ''} to start searching
+                        </p>
+                    )}
                 </div>
 
                 {isLoading ? (
@@ -181,6 +202,7 @@ export default function CategoriesPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        className='cursor-pointer hover:bg-black hover:text-white transition-colors'
                                                         onClick={() => handleEdit(category)}
                                                     >
                                                         <Pencil className="h-4 w-4" />
@@ -188,6 +210,7 @@ export default function CategoriesPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        className='cursor-pointer hover:bg-destructive/10 transition-colors'
                                                         onClick={() => handleDelete(category)}
                                                     >
                                                         <Trash2 className="h-4 w-4 text-destructive" />
