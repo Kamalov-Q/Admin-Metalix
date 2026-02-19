@@ -5,21 +5,20 @@ interface PaginationProps {
     meta?: PaginationMeta;
     length?: number;
     onPageChange?: (page: number) => void;
-    currentPage?: number;
 }
 
-export default function Pagination({ meta, length, onPageChange, currentPage }: PaginationProps) {
+export default function Pagination({ meta, length, onPageChange }: PaginationProps) {
     if (!meta) return null;
 
     const handlePrevious = () => {
-        if (onPageChange && currentPage && meta.hasPreviousPage) {
-            onPageChange(currentPage - 1);
+        if (onPageChange && meta.hasPreviousPage) {
+            onPageChange(meta?.page - 1);
         }
     };
 
     const handleNext = () => {
-        if (onPageChange && currentPage && meta.hasNextPage) {
-            onPageChange(currentPage + 1);
+        if (onPageChange && meta.hasNextPage) {
+            onPageChange(meta?.page + 1);
         }
     };
 

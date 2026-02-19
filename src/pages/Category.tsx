@@ -224,7 +224,7 @@ export default function CategoriesPage() {
                         </div>
 
                         {/* Pagination */}
-                        <Pagination meta={data?.meta} length={data?.data?.length} />
+                        <Pagination meta={data?.meta} length={data?.data?.length} onPageChange={(p) => setPage(p)} />
                     </>
                 )}
             </Card>
