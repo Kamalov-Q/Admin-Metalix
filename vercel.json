@@ -1,16 +1,8 @@
 {
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "http://137.184.82.115:3002/$1",
-            "methods": [
-                "GET",
-                "POST",
-                "PUT",
-                "PATCH",
-                "DELETE",
-                "OPTIONS"
-            ]
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
