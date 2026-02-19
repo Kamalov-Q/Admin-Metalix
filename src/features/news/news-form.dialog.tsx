@@ -54,6 +54,20 @@ export function NewsFormDialog({
     const imageUrl = watch('imageUrl');
 
     useEffect(() => {
+
+        if (!open) {
+            reset({
+                imageUrl: '',
+                titleEn: '',
+                titleRu: '',
+                titleUz: '',
+                contentEn: '',
+                contentRu: '',
+                contentUz: '',
+                author: '',
+            });
+        }
+
         if (news) {
             reset({
                 imageUrl: news.imageUrl,
@@ -221,6 +235,7 @@ export function NewsFormDialog({
 
                     <DialogFooter>
                         <Button
+                            className='cursor-pointer'
                             type="button"
                             variant="outline"
                             onClick={() => onOpenChange(false)}
@@ -228,7 +243,7 @@ export function NewsFormDialog({
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" disabled={isLoading} className='cursor-pointer'>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {news ? 'Update Article' : 'Create Article'}
                         </Button>

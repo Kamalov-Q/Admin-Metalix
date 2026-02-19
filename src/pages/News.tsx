@@ -11,12 +11,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Search, Loader2, Newspaper, ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, Newspaper, ImageIcon, X } from 'lucide-react';
 import { formatDateTime, truncate } from '@/lib/utils';
 import Pagination from '@/features/pagination';
 import { useNews, useCreateNews, useUpdateNews, useDeleteNews } from '@/hooks/use-news';
 import { NewsFormDialog } from '@/features/news/news-form.dialog';
 import { DeleteNewsDialog } from '@/features/news/delete-news.dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function NewsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,10 +26,13 @@ export default function NewsPage() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [selectedNews, setSelectedNews] = useState<News | null>(null);
 
+    const debouncedSearch = useDebounce(searchTerm, 300);
+    const effectiveSearch = debouncedSearch.length >= 3 ? debouncedSearch : '';
+
     const { data, isLoading } = useNews({
         page,
         limit: 10,
-        search: searchTerm,
+        search: effectiveSearch,
         sortOrder: 'DESC',
     });
 
@@ -83,6 +87,11 @@ export default function NewsPage() {
         }
     };
 
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setPage(1);
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -92,7 +101,7 @@ export default function NewsPage() {
                         Manage news articles and updates
                     </p>
                 </div>
-                <Button onClick={handleCreate}>
+                <Button onClick={handleCreate} className='cursor-pointer'>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Article
                 </Button>
@@ -111,7 +120,18 @@ export default function NewsPage() {
                             }}
                             className="pl-10"
                         />
+                        {searchTerm && (
+                            <button onClick={handleClearSearch} className='absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors' type="button">
+                                <X className='h-4 w-4' />
+                            </button>
+                        )}
                     </div>
+                    {searchTerm?.length > 0 && searchTerm?.length < 3 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Enter {3 - searchTerm.length} more character
+                            {3 - searchTerm.length > 1 ? 's' : ''} to start searching
+                        </p>
+                    )}
                 </div>
 
                 {isLoading ? (
@@ -231,6 +251,7 @@ export default function NewsPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        className='cursor-pointer'
                                                         onClick={() => handleEdit(news)}
                                                     >
                                                         <Pencil className="h-4 w-4" />
@@ -238,6 +259,7 @@ export default function NewsPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        className='cursor-pointer'
                                                         onClick={() => handleDelete(news)}
                                                     >
                                                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -254,7 +276,6 @@ export default function NewsPage() {
                             meta={data?.meta}
                             length={data?.data?.length}
                             onPageChange={setPage}
-                            currentPage={page}
                         />
                     </>
                 )}

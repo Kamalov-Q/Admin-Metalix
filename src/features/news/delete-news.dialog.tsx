@@ -40,11 +40,11 @@ export function DeleteNewsDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isLoading} className='cursor-pointer'>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         disabled={isLoading}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
                     >
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Delete Article

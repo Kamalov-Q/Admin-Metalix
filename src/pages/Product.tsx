@@ -280,7 +280,6 @@ export default function ProductsPage() {
                             meta={data?.meta}
                             length={data?.data?.length}
                             onPageChange={setPage}
-                            currentPage={page}
                         />
                     </>
                 )}
