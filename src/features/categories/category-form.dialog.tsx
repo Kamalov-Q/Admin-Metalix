@@ -43,6 +43,16 @@ export function CategoryFormDialog({
     });
 
     useEffect(() => {
+
+        if (!open) {
+            reset({
+                nameEn: '',
+                nameRu: '',
+                nameUz: ''
+            });
+            return;
+        }
+
         if (category) {
             reset({
                 nameEn: category.nameEn,
@@ -56,7 +66,7 @@ export function CategoryFormDialog({
                 nameUz: '',
             });
         }
-    }, [category, reset]);
+    }, [category, reset, open]);
 
     const handleFormSubmit = (data: CreateCategoryDto) => {
         onSubmit(data);
