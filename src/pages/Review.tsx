@@ -58,7 +58,7 @@ export default function ReviewsPage() {
         page,
         limit: 10,
         sortOrder: 'DESC',
-        fullName: fullNameSearch || undefined,
+        fullName: effectiveSearch || undefined,
         productId: productId === 'all' ? undefined : productId,
         status: statusFilter === 'all' ? undefined : statusFilter,
     });
