@@ -18,12 +18,6 @@ interface ReviewDetailsDialogProps {
     review: Review | null;
 }
 
-const statusVariants: Record<ReviewStatus, 'warning' | 'success' | 'destructive'> = {
-    PENDING: 'warning',
-    ACCEPTED: 'success',
-    REJECTED: 'destructive',
-};
-
 function StarRating({ rating }: { rating: number }) {
     return (
         <div className="flex items-center space-x-1">
@@ -59,15 +53,15 @@ export function ReviewDetailsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[90vh]">
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>Review Details</DialogTitle>
                     <DialogDescription>
                         Full information about this review
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="flex-1 overflow-y-auto pr-1 space-y-6">
                     {/* Reviewer Info */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Reviewer</h3>
@@ -76,7 +70,7 @@ export function ReviewDetailsDialog({
                                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                                    <p className="text-sm">{review.fullName}</p>
+                                    <p className="text-sm">{review.fullName || 'N/A'}</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-3">
@@ -137,51 +131,48 @@ export function ReviewDetailsDialog({
                     {/* Status */}
                     <div className="space-y-3">
                         <h3 className="text-lg font-semibold">Status</h3>
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center space-x-3">
-                                <p className="text-sm text-muted-foreground">Current status:</p>
-                                <Badge variant={statusVariants?.ACCEPTED ? "default" : (statusVariants?.PENDING ? "secondary" : "destructive")}>
-                                    {review.status}
-                                </Badge>
-                            </div>
+                        <div className="flex items-center space-x-3 p-4 border rounded-lg">
+                            <p className="text-sm text-muted-foreground">Current status:</p>
+                            <Badge>
+                                {review.status}
+                            </Badge>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Action Buttons - only show if PENDING */}
-                        {review.status === 'PENDING' && (
-                            <div className="flex space-x-3">
-                                <Button
-                                    className="flex-1"
-                                    variant="default"
-                                    onClick={() => handleStatusChange('ACCEPTED')}
-                                    disabled={updateStatusMutation.isPending}
-                                >
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Approve
-                                </Button>
-                                <Button
-                                    className="flex-1"
-                                    variant="destructive"
-                                    onClick={() => handleStatusChange('REJECTED')}
-                                    disabled={updateStatusMutation.isPending}
-                                >
-                                    <X className="h-4 w-4 mr-2" />
-                                    Reject
-                                </Button>
-                            </div>
-                        )}
-
-                        {/* Re-action Buttons - show if already actioned */}
-                        {review.status !== 'PENDING' && (
+                {/* Action Buttons - pinned to bottom, outside scroll */}
+                <div className="flex-shrink-0 pt-4 border-t">
+                    {review.status === 'PENDING' ? (
+                        <div className="flex space-x-3">
                             <Button
-                                className="w-full"
-                                variant="outline"
-                                onClick={() => handleStatusChange('PENDING')}
+                                className="flex-1 cursor-pointer"
+                                variant="default"
+                                onClick={() => handleStatusChange('ACCEPTED')}
                                 disabled={updateStatusMutation.isPending}
                             >
-                                Reset to Pending
+                                <Check className="h-4 w-4 mr-2" />
+                                Approve
                             </Button>
-                        )}
-                    </div>
+                            <Button
+                                className="flex-1 cursor-pointer"
+                                variant="destructive"
+                                onClick={() => handleStatusChange('REJECTED')}
+                                disabled={updateStatusMutation.isPending}
+                            >
+                                <X className="h-4 w-4 mr-2" />
+                                Reject
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            className="w-full"
+                            variant="outline"
+                            onClick={() => handleStatusChange('PENDING')}
+                            disabled={updateStatusMutation.isPending}
+                        >
+                            Reset to Pending
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

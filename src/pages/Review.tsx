@@ -25,6 +25,7 @@ import { useReviews, useUpdateReviewStatus } from '@/hooks/use-reviews';
 import { useProducts } from '@/hooks/use-products';
 import { ReviewDetailsDialog } from '@/features/reviews/review-details-dialog';
 import Pagination from '@/features/pagination';
+import { useDebounce } from '@/hooks/use-debounce';
 
 function StarRating({ rating }: { rating: number }) {
     return (
@@ -50,6 +51,9 @@ export default function ReviewsPage() {
     const [viewOpen, setViewOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
+    const debouncedSearch = useDebounce(fullNameSearch, 300);
+    const effectiveSearch = debouncedSearch.length >= 3 ? debouncedSearch : '';
+
     const { data, isLoading } = useReviews({
         page,
         limit: 10,
@@ -70,6 +74,11 @@ export default function ReviewsPage() {
     const handleStatusChange = (id: string, status: ReviewStatus) => {
         updateStatusMutation.mutate({ id, dto: { status } });
     };
+
+    const handleClearSearch = () => {
+        setFullNameSearch('');
+        setPage(1);
+    }
 
     const handleResetFilters = () => {
         setFullNameSearch('');
@@ -112,7 +121,18 @@ export default function ReviewsPage() {
                             }}
                             className="pl-10"
                         />
+                        {fullNameSearch && (
+                            <button onClick={handleClearSearch} className='absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors' type="button">
+                                <X className='h-4 w-4' />
+                            </button>
+                        )}
                     </div>
+                    {fullNameSearch?.length > 0 && fullNameSearch?.length < 3 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Enter {3 - fullNameSearch.length} more character
+                            {3 - fullNameSearch.length > 1 ? 's' : ''} to start searching
+                        </p>
+                    )}
                     <Select
                         value={productId}
                         onValueChange={(value) => {
@@ -154,7 +174,7 @@ export default function ReviewsPage() {
                             variant="ghost"
                             size="sm"
                             onClick={handleResetFilters}
-                            className="text-muted-foreground hover:text-foreground whitespace-nowrap"
+                            className="text-muted-foreground hover:text-foreground whitespace-nowrap cursor-pointer"
                         >
                             Clear filters
                         </Button>
@@ -259,6 +279,7 @@ export default function ReviewsPage() {
                                                 <div className="flex items-center justify-end space-x-1">
                                                     <Button
                                                         variant="ghost"
+                                                        className='cursor-pointer'
                                                         size="sm"
                                                         onClick={() => handleView(review)}
                                                     >
@@ -270,7 +291,7 @@ export default function ReviewsPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50 cursor-pointer"
                                                                 onClick={() => handleStatusChange(review.id, 'ACCEPTED')}
                                                                 disabled={updateStatusMutation.isPending}
                                                             >
@@ -279,7 +300,7 @@ export default function ReviewsPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                                className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                                                                 onClick={() => handleStatusChange(review.id, 'REJECTED')}
                                                                 disabled={updateStatusMutation.isPending}
                                                             >
@@ -299,7 +320,6 @@ export default function ReviewsPage() {
                             meta={data?.meta}
                             length={data?.data?.length}
                             onPageChange={setPage}
-                            currentPage={page}
                         />
                     </>
                 )}
