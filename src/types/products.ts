@@ -6,7 +6,7 @@ export interface Product {
     nameEn: string;
     nameRu: string;
     nameUz: string;
-    imageUrl: string;
+    imageUrls: string[];
     descriptionUz: string;
     descriptionRu: string;
     descriptionEn: string;
@@ -21,7 +21,7 @@ export interface CreateProductDto {
     nameEn: string;
     nameRu: string;
     nameUz: string;
-    imageUrl: string;
+    imageUrls: string[];
     descriptionUz: string;
     descriptionRu: string;
     descriptionEn: string;

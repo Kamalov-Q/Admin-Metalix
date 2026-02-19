@@ -1,21 +1,24 @@
 import apiClient from "./client";
 
 export interface UploadResponse {
-    url: string;
+    urls: string[];
 }
 
 export const uploadApi = {
-    uploadImage: async (file: File): Promise<string> => {
+    uploadImages: async (files: File[]): Promise<string[]> => {
         const formData = new FormData();
-        formData.append('file', file);
 
-        const response = await apiClient.post<UploadResponse>(`/upload/image`, formData, {
+        files?.forEach((file) => {
+            formData.append("files", file);
+        });
+
+        const response = await apiClient.post<UploadResponse>(`/upload/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
 
-        return response.data.url;
+        return response.data?.urls;
     },
 
     deleteFile: async (fileUrl: string): Promise<void> => {

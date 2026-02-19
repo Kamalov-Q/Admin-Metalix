@@ -29,7 +29,6 @@ export default function LoginPage() {
             setUser(data.user);
             setTokens(data.accessToken, data.refreshToken);
             toast.success('Successfully logged in!');
-            console.log(data, 'Auth data');
             navigate('/', { replace: true });
         },
         onError: (error: any) => {

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export function useUploadImage() {
     return useMutation({
-        mutationFn: uploadApi.uploadImage,
+        mutationFn: (files: File[]) => uploadApi.uploadImages(files),
         onError: (error: any) => {
             const message = error?.response?.data?.message || 'Failed to upload image!';
             toast.error(message);

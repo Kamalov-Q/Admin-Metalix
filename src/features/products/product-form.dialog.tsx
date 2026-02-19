@@ -23,7 +23,6 @@ import { ImageUpload } from '@/components/common/image-upload';
 import { Loader2 } from 'lucide-react';
 import type { CreateProductDto, Product } from '@/types/products';
 import { useCategories } from '@/hooks/use-categories';
-import { queryClient } from '@/lib/query-client';
 
 interface ProductFormDialogProps {
     open: boolean;
@@ -51,18 +50,18 @@ export function ProductFormDialog({
         watch,
     } = useForm<CreateProductDto>({
         defaultValues: {
-            nameEn: product?.nameEn || '',
-            nameRu: product?.nameRu || '',
-            nameUz: product?.nameUz || '',
-            descriptionEn: product?.descriptionEn || '',
-            descriptionRu: product?.descriptionRu || '',
-            descriptionUz: product?.descriptionUz || '',
-            imageUrl: product?.imageUrl || '',
-            categoryId: product?.categoryId || '',
+            nameEn: '',
+            nameRu: '',
+            nameUz: '',
+            descriptionEn: '',
+            descriptionRu: '',
+            descriptionUz: '',
+            imageUrls: [],
+            categoryId: '',
         },
     });
 
-    const imageUrl = watch('imageUrl');
+    const imageUrls = watch('imageUrls');
     const categoryId = watch('categoryId');
 
     useEffect(() => {
@@ -74,7 +73,7 @@ export function ProductFormDialog({
                 descriptionEn: product.descriptionEn,
                 descriptionRu: product.descriptionRu,
                 descriptionUz: product.descriptionUz,
-                imageUrl: product.imageUrl,
+                imageUrls: product.imageUrls ? product.imageUrls : (product.imageUrls || []),
                 categoryId: product.categoryId,
             });
         } else {
@@ -85,7 +84,7 @@ export function ProductFormDialog({
                 descriptionEn: '',
                 descriptionRu: '',
                 descriptionUz: '',
-                imageUrl: '',
+                imageUrls: [],
                 categoryId: '',
             });
         }
@@ -93,7 +92,6 @@ export function ProductFormDialog({
 
     const handleFormSubmit = (data: CreateProductDto) => {
         onSubmit(data);
-        queryClient.invalidateQueries({ queryKey: ['products'] });
     };
 
     return (
@@ -110,19 +108,24 @@ export function ProductFormDialog({
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-                    {/* Image Upload */}
+                    {/* Image Upload - Multiple */}
                     <div className="space-y-2">
-                        <Label>Product Image <span className="text-destructive">*</span></Label>
+                        <Label>Product Images <span className="text-destructive">*</span></Label>
                         <ImageUpload
-                            value={imageUrl}
-                            onChange={(url) => {
-                                setValue('imageUrl', url, { shouldValidate: true });
-                                queryClient.invalidateQueries({ queryKey: ['products'] });
-                            }}
+                            value={imageUrls}
+                            onChange={(urls) => setValue('imageUrls', urls as string[], { shouldValidate: true })}
+                            multiple={true}
+                            maxFiles={20}
                         />
-                        <input type="hidden" {...register('imageUrl', { required: 'Image is required' })} />
-                        {errors.imageUrl && (
-                            <p className="text-sm text-destructive">{errors.imageUrl.message}</p>
+                        <input
+                            type="hidden"
+                            {...register('imageUrls', {
+                                required: 'At least one image is required',
+                                validate: (value) => (value && value.length > 0) || 'At least one image is required'
+                            })}
+                        />
+                        {errors.imageUrls && (
+                            <p className="text-sm text-destructive">{errors.imageUrls.message}</p>
                         )}
                     </div>
 
@@ -141,7 +144,7 @@ export function ProductFormDialog({
                             <SelectContent>
                                 {categories?.data.map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
-                                        {category?.nameEn}
+                                        {category.nameEn}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
