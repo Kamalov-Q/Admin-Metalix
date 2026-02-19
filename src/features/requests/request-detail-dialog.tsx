@@ -166,6 +166,7 @@ export function RequestDetailsDialog({
                             <Button
                                 variant={request.status === 'PENDING' ? 'default' : 'outline'}
                                 size="sm"
+                                className='cursor-pointer'
                                 onClick={() => handleStatusChange('PENDING')}
                                 disabled={
                                     request.status === 'PENDING' ||
@@ -181,7 +182,7 @@ export function RequestDetailsDialog({
                                 size="sm"
                                 className={
                                     request.status !== 'ACCEPTED'
-                                        ? 'text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50'
+                                        ? 'text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50 cursor-pointer'
                                         : ''
                                 }
                                 onClick={() => handleStatusChange('ACCEPTED')}
@@ -203,7 +204,7 @@ export function RequestDetailsDialog({
                                 size="sm"
                                 className={
                                     request.status !== 'REJECTED'
-                                        ? 'text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10'
+                                        ? 'text-destructive hover:text-destructive border-destructive/20 hover:bg-destructive/10 cursor-pointer'
                                         : ''
                                 }
                                 onClick={() => handleStatusChange('REJECTED')}

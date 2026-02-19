@@ -34,6 +34,7 @@ import { useRequests, useUpdateRequestStatus } from '@/hooks/use-requests';
 import { useProducts } from '@/hooks/use-products';
 import Pagination from '@/features/pagination';
 import { RequestDetailsDialog } from '@/features/requests/request-detail-dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function RequestsPage() {
     const [page, setPage] = useState(1);
@@ -44,11 +45,14 @@ export default function RequestsPage() {
     const [selectedRequest, setSelectedRequest] =
         useState<Request | null>(null);
 
+    const debouncedSearch = useDebounce(fullNameSearch, 300);
+    const effectiveSearch = debouncedSearch?.length >= 3 ? debouncedSearch : "";
+
     const { data, isLoading } = useRequests({
         page,
         limit: 10,
         sortOrder: 'DESC',
-        fullName: fullNameSearch || undefined,
+        fullName: effectiveSearch || undefined,
         productId: productId === 'all' ? undefined : productId,
         status: statusFilter === 'all' ? undefined : statusFilter,
     });
@@ -78,6 +82,11 @@ export default function RequestsPage() {
         setStatusFilter('all');
         setPage(1);
     };
+
+    const handleClearSearch = () => {
+        setFullNameSearch('');
+        setPage(1);
+    }
 
     const hasActiveFilters =
         fullNameSearch !== '' ||
@@ -117,7 +126,19 @@ export default function RequestsPage() {
                             }}
                             className="pl-10"
                         />
+                        {fullNameSearch && (
+                            <button onClick={handleClearSearch} className='absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors' type="button">
+                                <X className='h-4 w-4' />
+                            </button>
+                        )}
                     </div>
+
+                    {fullNameSearch?.length > 0 && fullNameSearch?.length < 3 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Enter {3 - fullNameSearch.length} more character
+                            {3 - fullNameSearch.length > 1 ? 's' : ''} to start searching
+                        </p>
+                    )}
 
                     <Select
                         value={productId}
@@ -169,7 +190,7 @@ export default function RequestsPage() {
                             variant="ghost"
                             size="sm"
                             onClick={handleResetFilters}
-                            className="text-muted-foreground hover:text-foreground whitespace-nowrap"
+                            className="text-muted-foreground hover:text-foreground whitespace-nowrap cursor-pointer"
                         >
                             Clear filters
                         </Button>
@@ -297,6 +318,7 @@ export default function RequestsPage() {
                                                 <div className="flex items-center justify-end space-x-1">
                                                     <Button
                                                         variant="ghost"
+                                                        className='cursor-pointer'
                                                         size="sm"
                                                         onClick={() =>
                                                             handleView(request)
@@ -314,7 +336,7 @@ export default function RequestsPage() {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
                                                                     onClick={() =>
                                                                         handleStatusChange(
                                                                             request.id,
@@ -331,7 +353,7 @@ export default function RequestsPage() {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 cursor-pointer"
                                                                     onClick={() =>
                                                                         handleStatusChange(
                                                                             request.id,
@@ -348,7 +370,7 @@ export default function RequestsPage() {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                                    className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                                                                     onClick={() =>
                                                                         handleStatusChange(
                                                                             request.id,
@@ -375,7 +397,6 @@ export default function RequestsPage() {
                             meta={data.meta}
                             length={data.data.length}
                             onPageChange={setPage}
-                            currentPage={page}
                         />
                     </>
                 )}
