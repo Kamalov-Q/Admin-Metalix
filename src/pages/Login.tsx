@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth-store';
-import type { LoginDto } from '@/types';
 import { Loader2 } from 'lucide-react';
+import type { LoginDto } from '@/types/auth';
 
 export default function LoginPage() {
     const navigate = useNavigate();

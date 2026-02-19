@@ -8,8 +8,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import type { Product } from '@/types/products';
 import { Loader2 } from 'lucide-react';
-import type { Product } from '@/types/entities';
 
 interface DeleteProductDialogProps {
     open: boolean;

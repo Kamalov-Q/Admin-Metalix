@@ -1,5 +1,5 @@
+import type { AuthResponse, LoginDto } from '@/types/auth';
 import apiClient from './client';
-import type { LoginDto, AuthResponse } from '@/types';
 
 export const authApi = {
     login: async (dto: LoginDto): Promise<AuthResponse> => {

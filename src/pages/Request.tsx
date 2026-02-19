@@ -35,15 +35,6 @@ import { useProducts } from '@/hooks/use-products';
 import Pagination from '@/features/pagination';
 import { RequestDetailsDialog } from '@/features/requests/request-detail-dialog';
 
-const statusVariants: Record<
-    RequestStatus,
-    'warning' | 'info' | 'success' | 'destructive'
-> = {
-    PENDING: 'warning',
-    ACCEPTED: 'success',
-    REJECTED: 'destructive',
-};
-
 export default function RequestsPage() {
     const [page, setPage] = useState(1);
     const [fullNameSearch, setFullNameSearch] = useState('');

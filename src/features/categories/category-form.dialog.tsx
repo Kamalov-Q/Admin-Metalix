@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { CreateCategoryDto, Category } from '@/types';
+import type { CreateCategoryDto, Category } from '@/types/category';
 import { Loader2 } from 'lucide-react';
 
 interface CategoryFormDialogProps {
