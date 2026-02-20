@@ -17,7 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Search, Loader2, ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, ImageIcon, X } from 'lucide-react';
 import { formatDateTime, truncate } from '@/lib/utils';
 import Pagination from '@/features/pagination';
 import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct } from '@/hooks/use-products';
@@ -25,6 +25,7 @@ import { useCategories } from '@/hooks/use-categories';
 import type { CreateProductDto, Product } from '@/types/products';
 import { ProductFormDialog } from '@/features/products/product-form.dialog';
 import { DeleteProductDialog } from '@/features/products/delete-product.dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,10 +35,14 @@ export default function ProductsPage() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+    const debouncedSearch = useDebounce(searchTerm, 300);
+    const effectiveSearch = debouncedSearch.length >= 3 ? debouncedSearch : '';
+
+
     const { data, isLoading } = useProducts({
         page,
         limit: 10,
-        search: searchTerm,
+        search: effectiveSearch,
         categoryId: categoryFilter === 'all' ? undefined : categoryFilter,
     });
 
@@ -93,6 +98,11 @@ export default function ProductsPage() {
         }
     };
 
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setPage(1);
+    }
+
     // Helper to get first image URL
     const getFirstImage = (product: Product): string | undefined => {
         if (product.imageUrls && product.imageUrls.length > 0) {
@@ -118,7 +128,7 @@ export default function ProductsPage() {
                         Manage your products with images and descriptions
                     </p>
                 </div>
-                <Button onClick={handleCreate}>
+                <Button onClick={handleCreate} className='cursor-pointer'>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Product
                 </Button>
@@ -137,7 +147,20 @@ export default function ProductsPage() {
                             }}
                             className="pl-10"
                         />
+                        {searchTerm && (
+                            <button onClick={handleClearSearch} className='absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors' type="button">
+                                <X className='h-4 w-4' />
+                            </button>
+                        )}
                     </div>
+
+                    {searchTerm?.length > 0 && searchTerm?.length < 3 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Enter {3 - searchTerm.length} more character
+                            {3 - searchTerm.length > 1 ? 's' : ''} to start searching
+                        </p>
+                    )}
+
                     <Select
                         value={categoryFilter}
                         onValueChange={(value) => {
@@ -255,6 +278,7 @@ export default function ProductsPage() {
                                                     <div className="flex items-center justify-end space-x-2">
                                                         <Button
                                                             variant="ghost"
+                                                            className='cursor-pointer'
                                                             size="sm"
                                                             onClick={() => handleEdit(product)}
                                                         >
@@ -263,6 +287,7 @@ export default function ProductsPage() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
+                                                            className='cursor-pointer'
                                                             onClick={() => handleDelete(product)}
                                                         >
                                                             <Trash2 className="h-4 w-4 text-destructive" />

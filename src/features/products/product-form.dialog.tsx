@@ -65,6 +65,20 @@ export function ProductFormDialog({
     const categoryId = watch('categoryId');
 
     useEffect(() => {
+
+        if (!open) {
+            reset({
+                nameEn: '',
+                nameRu: '',
+                nameUz: '',
+                descriptionEn: '',
+                descriptionRu: '',
+                descriptionUz: '',
+                imageUrls: [],
+                categoryId: '',
+            });
+        }
+
         if (product) {
             reset({
                 nameEn: product.nameEn,
@@ -272,13 +286,14 @@ export function ProductFormDialog({
                     <DialogFooter>
                         <Button
                             type="button"
+                            className='cursor-pointer'
                             variant="outline"
                             onClick={() => onOpenChange(false)}
                             disabled={isLoading}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" disabled={isLoading} className='cursor-pointer'>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {product ? 'Update Product' : 'Create Product'}
                         </Button>
