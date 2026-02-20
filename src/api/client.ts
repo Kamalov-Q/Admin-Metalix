@@ -33,10 +33,7 @@ apiClient.interceptors.response.use(
 
             try {
                 const refreshToken = useAuthStore.getState().refreshToken;
-
-                if (!refreshToken) {
-                    throw new Error('No refresh token available');
-                }
+                if (!refreshToken) throw new Error('No refresh token');
 
                 const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
                 const { accessToken, refreshToken: newRefreshToken } = response.data;

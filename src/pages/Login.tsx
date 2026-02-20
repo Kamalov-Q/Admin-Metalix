@@ -13,21 +13,15 @@ import type { LoginDto } from '@/types/auth';
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const { setUser, setTokens } = useAuthStore();
     const [serverError, setServerError] = useState<string | null>(null);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginDto>();
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginDto>();
 
     const loginMutation = useMutation({
         mutationFn: authApi.login,
         onSuccess: (data) => {
             setServerError(null);
-            setUser(data.user);
-            setTokens(data.accessToken, data.refreshToken);
+            useAuthStore.getState().setAuth(data.user, data.accessToken, data.refreshToken);
             navigate('/', { replace: true });
         },
         onError: (error: any) => {
@@ -104,12 +98,7 @@ export default function LoginPage() {
                             </div>
                         )}
 
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={loginMutation.isPending}
-                            onClick={(e) => e.stopPropagation()}
-                        >
+                        <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
                             {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Sign In
                         </Button>
