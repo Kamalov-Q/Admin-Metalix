@@ -73,7 +73,7 @@ export default function NewsPage() {
                     setSelectedNews(null);
                 },
             });
-        }
+        } 
     };
 
     const handleDeleteConfirm = () => {

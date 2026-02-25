@@ -16,7 +16,7 @@ import { ImageUpload } from '@/components/common/image-upload';
 import { Loader2 } from 'lucide-react';
 import type { News, CreateNewsDto } from '@/types/news';
 
-interface NewsFormDialogProps {
+interface NewsFormDialogProps { 
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (data: CreateNewsDto) => void;
