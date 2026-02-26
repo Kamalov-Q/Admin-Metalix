@@ -19,6 +19,8 @@ import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } fro
 import { usePortfolios } from '@/hooks/use-portfolios';
 import type { Project, CreateProjectDto } from '@/types/project';
 import { useDebounce } from '@/hooks/use-debounce';
+import { ProjectFormDialog } from '@/features/projects/project-form.dialog';
+import { DeleteProjectDialog } from '@/features/projects/delete-project.dialog';
 
 export default function ProjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,8 +38,7 @@ export default function ProjectsPage() {
         search: effectiveSearch,
     });
 
-    // Get portfolio counts for each project
-    const { data: portfoliosData } = usePortfolios({ page: 1, limit: 1000 });
+    const { data: portfoliosData } = usePortfolios({ page: 1, limit: 100 });
 
     const getPortfolioCount = (projectId: string) => {
         return portfoliosData?.data.filter(p => p.projectId === projectId).length || 0;
@@ -205,6 +206,7 @@ export default function ProjectsPage() {
                                                 <div className="flex items-center justify-end space-x-2">
                                                     <Button
                                                         variant="ghost"
+                                                        className='cursor-pointer'
                                                         size="sm"
                                                         onClick={() => handleEdit(project)}
                                                     >
@@ -212,6 +214,7 @@ export default function ProjectsPage() {
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
+                                                        className='cursor-pointer'
                                                         size="sm"
                                                         onClick={() => handleDelete(project)}
                                                     >
@@ -234,7 +237,7 @@ export default function ProjectsPage() {
                 )}
             </Card>
 
-            {/* <ProjectFormDialog
+            <ProjectFormDialog
                 open={formOpen}
                 onOpenChange={setFormOpen}
                 onSubmit={handleFormSubmit}
@@ -248,7 +251,7 @@ export default function ProjectsPage() {
                 onConfirm={handleDeleteConfirm}
                 project={selectedProject}
                 isLoading={deleteMutation.isPending}
-            /> */}
+            />
         </div>
     );
 }

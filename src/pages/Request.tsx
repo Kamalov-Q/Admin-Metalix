@@ -33,7 +33,7 @@ import { formatDateTime } from '@/lib/utils';
 import { useRequests, useUpdateRequestStatus } from '@/hooks/use-requests';
 import { useProducts } from '@/hooks/use-products';
 import Pagination from '@/features/pagination';
-import { RequestDetailsDialog } from '@/features/requests/request-detail-dialog';
+import { RequestDetailsDialog } from '@/features/requests/request-detail.dialog';
 import { useDebounce } from '@/hooks/use-debounce';
 
 export default function RequestsPage() {

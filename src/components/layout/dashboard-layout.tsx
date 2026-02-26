@@ -13,6 +13,8 @@ import {
     LogOut,
     Menu,
     X,
+    FolderKanban,
+    Rocket,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +25,9 @@ const navigation = [
     { name: 'News', href: '/news', icon: Newspaper },
     { name: 'Requests', href: '/requests', icon: MessageSquare },
     { name: 'Reviews', href: '/reviews', icon: Star },
-    { name: 'Careers', href: '/careers', icon: Briefcase },
+    { name: 'Careers', href: '/careers', icon: FolderKanban },
+    { name: 'Portfolios', href: '/portfolios', icon: Briefcase },
+    { name: 'Projects', href: '/projects', icon: Rocket },
 ];
 
 export default function DashboardLayout() {

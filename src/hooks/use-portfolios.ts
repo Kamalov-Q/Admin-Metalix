@@ -1,21 +1,29 @@
-// src/hooks/use-portfolios.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UpdatePortfolioDto } from '@/types/portfolio';
 import { toast } from 'sonner';
 import { portfoliosApi, type PortfolioFilterDto } from '@/api/portfolio';
 
-export function usePortfolios(filters?: PortfolioFilterDto) {
+export function usePortfolios(
+    filters?: PortfolioFilterDto,
+    options?: { enabled?: boolean }
+) {
     return useQuery({
         queryKey: ['portfolios', filters],
         queryFn: () => portfoliosApi.getAll(filters),
+        enabled: options?.enabled,
     });
 }
 
-export function usePortfoliosByProject(projectId: string, filters?: PortfolioFilterDto) {
+
+export function usePortfoliosByProject(
+    projectId: string,
+    filters?: PortfolioFilterDto,
+    options?: { enabled?: boolean }
+) {
     return useQuery({
         queryKey: ['portfolios', 'project', projectId, filters],
         queryFn: () => portfoliosApi.getByProject(projectId, filters),
-        enabled: !!projectId,
+        enabled: options?.enabled !== false && !!projectId,
     });
 }
 

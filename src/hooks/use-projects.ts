@@ -1,4 +1,3 @@
-// src/hooks/use-projects.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UpdateProjectDto } from '@/types/project';
 import { toast } from 'sonner';

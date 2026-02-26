@@ -13,6 +13,8 @@ import NewsPage from './pages/News';
 import RequestsPage from './pages/Request';
 import ReviewsPage from './pages/Review';
 import CareersPage from './pages/Career';
+import ProjectsPage from './pages/Projects';
+import PortfoliosPage from './pages/Portfolio';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -61,6 +63,8 @@ function App() {
             <Route path="requests" element={<RequestsPage />} />
             <Route path="reviews" element={<ReviewsPage />} />
             <Route path="careers" element={<CareersPage />} />
+            <Route path='projects' element={<ProjectsPage />} />
+            <Route path='portfolios' element={<PortfoliosPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

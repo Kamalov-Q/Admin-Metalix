@@ -23,7 +23,7 @@ import { Search, Loader2, Eye, Star, Package, Check, X } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import { useReviews, useUpdateReviewStatus } from '@/hooks/use-reviews';
 import { useProducts } from '@/hooks/use-products';
-import { ReviewDetailsDialog } from '@/features/reviews/review-details-dialog';
+import { ReviewDetailsDialog } from '@/features/reviews/review-details.dialog';
 import Pagination from '@/features/pagination';
 import { useDebounce } from '@/hooks/use-debounce';
 
