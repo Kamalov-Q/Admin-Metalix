@@ -113,7 +113,7 @@ export default function DashboardLayout() {
                         variant="ghost"
                         size="icon"
                         onClick={toggleSidebar}
-                        className={cn(!sidebarOpen && 'lg:block')}
+                        className={cn(!sidebarOpen && 'lg:block px-[10px]')}
                     >
                         <Menu className="h-5 w-5" />
                     </Button>
